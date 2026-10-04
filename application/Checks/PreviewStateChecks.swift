@@ -1,40 +1,24 @@
 import Foundation
-
-@main struct PreviewStateChecks {
-    @MainActor static func main() async {
-        let model = AppModel()
-        model.start()
-        precondition(!model.recording, "Missing model must block start")
-        model.install()
-        try? await Task.sleep(for: .milliseconds(600))
-        precondition(model.installing && model.progress > 0)
-        model.cancelInstall()
-        try? await Task.sleep(for: .milliseconds(200))
-        precondition(!model.installing && !model.modelReady && model.progress == 0)
-        model.modelReady = true
-        model.historyEnabled = true
-        model.start()
-        model.start()
-        precondition(model.recording && !model.processing)
-        model.removeModel()
-        precondition(model.modelReady, "Busy model must not be removed")
-        model.stop()
-        precondition(model.processing && !model.recording)
-        model.start()
-        precondition(model.processing && !model.recording)
-        model.cancel()
-        try? await Task.sleep(for: .seconds(4.2))
-        precondition(!model.busy && model.result.isEmpty && model.history.isEmpty, "Cancelled result must not arrive")
-        model.start()
-        model.stop()
-        try? await Task.sleep(for: .seconds(4.2))
-        precondition(!model.busy && !model.result.isEmpty && model.history.count == 1)
-        model.historyEnabled = false
-        model.start()
-        model.cancel()
-        precondition(!model.busy && model.history.count == 1)
-        model.removeModel()
-        precondition(!model.modelReady)
-        print("Preview state checks: PASS (missing model, install cancel, busy guard, late-result cancel, result/history, remove)")
+@main struct StateChecks {
+    static func main() {
+        var gate = SessionGate()
+        let cancelled = gate.begin()
+        precondition(gate.accepts(cancelled)); gate.cancel()
+        precondition(!gate.accepts(cancelled))
+        let next = gate.begin()
+        precondition(!gate.accepts(cancelled) && gate.accepts(next))
+        var edge = HotkeyEdge()
+        precondition(edge.down() && !edge.down() && edge.up() && !edge.up() && edge.down())
+        precondition(!RecordingPolicy.hasSpeech([]))
+        precondition(!RecordingPolicy.hasSpeech(Array(repeating: 0.2, count: 7999)))
+        precondition(!RecordingPolicy.hasSpeech(Array(repeating: 0, count: 16000)))
+        precondition(!RecordingPolicy.hasSpeech(Array(repeating: 0.00001, count: 16000)))
+        precondition(RecordingPolicy.hasSpeech(Array(repeating: 0.05, count: 16000)))
+        precondition(RecordingPolicy.maximumSamples == 4_800_000)
+        precondition(PasteService.matches(originalPID: 10, currentPID: 10, sameElement: true, safe: true, trusted: true))
+        for scenario in [(Optional<pid_t>(11), true, true, true), (nil, true, true, true), (10, false, true, true), (10, true, false, true), (10, true, true, false)] {
+            precondition(!PasteService.matches(originalPID: 10, currentPID: scenario.0, sameElement: scenario.1, safe: scenario.2, trusted: scenario.3))
+        }
+        print("State checks passed: cancellation, replacement, key repeat/release, silence/short/energy, five-minute cap, guarded paste.")
     }
 }

@@ -1,0 +1,22 @@
+name: Application checks
+on:
+  pull_request:
+    paths: ['application/**', '.github/workflows/application.yml']
+  push:
+    paths: ['application/**', '.github/workflows/application.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-test:
+    runs-on: macos-15
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: application
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and test without microphone or models
+        run: xcodebuild -project Voicex.xcodeproj -scheme Voicex -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath build/DerivedData test
+      - name: Check pure state guards
+        run: Scripts/check-preview.sh

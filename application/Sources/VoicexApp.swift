@@ -21,7 +21,7 @@ struct MenuContent: View {
     @ObservedObject var model: AppModel
     @Environment(\.openWindow) private var openWindow
     var body: some View {
-        Text("Voicex · демо интерфейса")
+        Text("Voicex · локальная диктовка")
         Button("Открыть Voicex") { openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true) }
         Button("Настройки") { model.section = .settings; openWindow(id: "main"); NSApp.activate(ignoringOtherApps: true) }
         Divider()
