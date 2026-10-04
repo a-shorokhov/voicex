@@ -43,9 +43,9 @@ if (demo) {
     letterLayer.append(element);
     return element;
   });
-  const travelTime = 2480;
+  const travelTime = 1240;
   const leadIn = 800;
-  let spacing = 168;
+  let spacing = 84;
   let originX = 0;
   let originY = 0;
   let rotation = 0;
@@ -74,7 +74,7 @@ if (demo) {
     rotation = Math.atan2(dy, dx) - Math.atan2(-130, 1765);
     originX = startX;
     originY = startY;
-    spacing = Math.max(168, travelTime * (scene.clientWidth < 600 ? 15 : 24) / (pathLength * width / 1896));
+    spacing = Math.max(84, travelTime * (scene.clientWidth < 600 ? 15 : 24) / (pathLength * width / 1896));
     trail.style.left = `${startX}px`;
     trail.style.top = `${startY}px`;
     trail.style.setProperty('--trail-width', `${width}px`);
@@ -130,7 +130,7 @@ if (demo) {
     cancelAnimationFrame(frame);
     lastFrame = 0;
     const paused = motion.matches || document.hidden || !visible;
-    document.documentElement.classList.toggle('motion-paused', paused);
+    demo.classList.toggle('motion-paused', paused);
     if (motion.matches) {
       bend.setAttribute('scale', '0');
       note.textContent = phrase.join('');
@@ -146,6 +146,39 @@ if (demo) {
     visible = entry.isIntersecting;
     synchronize();
   }, { threshold: .05 }).observe(demo);
+  motion.addEventListener('change', synchronize);
+  document.addEventListener('visibilitychange', synchronize);
+  synchronize();
+}
+
+// The three-step illustration runs independently of the hero's visibility.
+const how = document.querySelector<HTMLElement>('.how-section');
+if (how) {
+  const steps = Array.from(how.querySelectorAll<HTMLElement>('[data-step]'));
+  const motion = globalThis.matchMedia('(prefers-reduced-motion: reduce)');
+  let visible = false;
+  let frame = 0;
+  let elapsed = 0;
+  let lastFrame = 0;
+  const tick = (timestamp: number): void => {
+    if (lastFrame) elapsed += timestamp - lastFrame;
+    lastFrame = timestamp;
+    const active = Math.floor(elapsed / 2200) % steps.length;
+    steps.forEach((step, index) => step.classList.toggle('is-active', index === active));
+    frame = requestAnimationFrame(tick);
+  };
+  const synchronize = (): void => {
+    cancelAnimationFrame(frame);
+    lastFrame = 0;
+    const paused = motion.matches || document.hidden || !visible;
+    how.classList.toggle('motion-paused', paused);
+    if (motion.matches) steps.forEach((step) => step.classList.remove('is-active'));
+    if (!paused) frame = requestAnimationFrame(tick);
+  };
+  new IntersectionObserver(([entry]) => {
+    visible = entry.isIntersecting;
+    synchronize();
+  }, { threshold: .05 }).observe(how);
   motion.addEventListener('change', synchronize);
   document.addEventListener('visibilitychange', synchronize);
   synchronize();
