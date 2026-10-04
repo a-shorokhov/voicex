@@ -1,0 +1,44 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+DerivedData/
+.build/
+.swiftpm/
+*.dmg
+*.xcarchive
+*.xcuserstate
+xcuserdata/
+
+# Models, recordings, transcripts, diagnostics
+models/
+model-cache/
+recordings/
+transcripts/
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.log
+
+# Local tooling and worktrees
+.DS_Store
+.idea/
+.vscode/
+.worktrees/
+.codex/
+.agents/
+__pycache__/
+.venv/
