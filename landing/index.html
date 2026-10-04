@@ -38,6 +38,7 @@
           <div class="magic-trajectory">
             <svg class="magic-art" viewBox="0 0 1896 830" aria-hidden="true">
               <defs>
+                <path data-trail-path/>
                 <filter id="magic-bend" x="-5%" y="-20%" width="110%" height="140%" color-interpolation-filters="sRGB">
                   <feImage href="%BASE_URL%assets/trajectory-displacement.svg" x="0" y="0" width="1896" height="830" preserveAspectRatio="none" result="bend-map"/>
                   <feComponentTransfer in="bend-map" result="centered-map">
@@ -50,6 +51,7 @@
               <image href="%BASE_URL%assets/white-magic-trajectory.png" width="1896" height="830" filter="url(#magic-bend)"/>
             </svg>
           </div>
+          <div class="trajectory-letters" data-trajectory-letters></div>
           <div class="note-window">
             <div class="note-toolbar" aria-hidden="true"><span class="window-dots"><i></i><i></i><i></i></span><span class="note-app">Заметка</span><span>Аа</span></div>
             <div class="note-body"><p><span data-demo-text>Давай обсудим идею завтра.</span><span class="cursor" aria-hidden="true"></span></p></div>

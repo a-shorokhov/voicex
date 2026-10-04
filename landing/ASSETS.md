@@ -6,6 +6,7 @@
 - `public/assets/process.webp`: панорамная лента, 2172 × 724.
 - `public/assets/privacy.webp`: концептуальная иллюстрация Apple Silicon, 1536 × 1024. Яблочко и M возвращены по прямому запросу пользователя.
 - `public/assets/white-magic-trajectory.png`: предоставленный пользователем прозрачный PNG, 1896 × 830. Скопирован без изменения пикселей из `output/imagegen/landing-letter-flow/white-magic-trajectory-asset.png`; инструкция — `white-magic-trajectory-asset.md`. Белый ореол и искры находятся в PNG, движение середины добавлено через SVG-фильтр, концы неподвижны.
+- `src/trajectory-centerline.ts`: центральная линия, измеренная по альфа-каналу предоставленного PNG; координаты нужны для точного движения букв.
 - `public/assets/trajectory-displacement.svg`: кодовая карта смещения середины траектории с нейтральными краями.
 - `public/favicon.svg`: небольшая кодовая иконка листьев Voicex. Знак сайта — листья, Apple используется только в иллюстрации совместимой платформы.
 

@@ -25,6 +25,12 @@
 /* A responsive sound-to-text arc. Typography stays as sharp, real Cyrillic. */
 .magic-trajectory{position:absolute;z-index:4;pointer-events:none;transform-origin:0 0;--trail-width:460px;left:60%;top:460px;transform:rotate(-18deg)}
 .magic-art{position:absolute;overflow:visible;width:var(--trail-width);height:calc(var(--trail-width) * .4377637);left:calc(var(--trail-width) * -.0342827);top:calc(var(--trail-width) * -.3375527)}
+.trajectory-letters{position:absolute;inset:0;z-index:5;pointer-events:none}
+.trajectory-letters span{position:absolute;left:0;top:0;color:#092d1b;font:18px/1 Arial,sans-serif;opacity:0;will-change:transform,opacity}
+.hero-shell[data-state='writing'] [data-demo-text]{animation:noteReveal .7s ease-out both}
+.hero-shell[data-state='flying'] .cursor{visibility:hidden}
+@keyframes noteReveal{from{opacity:0;filter:blur(2px)}to{opacity:1;filter:blur(0)}}
+@media(max-width:600px){.trajectory-letters span{font-size:12px}}
 .recorder{pointer-events:none;cursor:default}
 .note-window{animation:none;transform:perspective(900px) rotateY(-10deg);transform-origin:center}
 
