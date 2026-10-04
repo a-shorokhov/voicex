@@ -23,7 +23,7 @@ if (release.available && publicURL(release.downloadURL) && publicURL(release.che
   });
 }
 
-// Words and the PNG share the same measured centerline and displacement map.
+// Letters and the PNG share the same measured centerline and displacement map.
 const demo = document.querySelector<HTMLElement>('[data-demo]');
 if (demo) {
   const scene = demo.querySelector<HTMLElement>('.voice-scene')!;
@@ -37,15 +37,16 @@ if (demo) {
   const phrase = Array.from('Давай обсудим идею завтра.');
   path.setAttribute('d', trajectoryCenterline);
   const pathLength = path.getTotalLength();
-  const words = phrase.join('').split(' ').map((word) => {
+  const letters = phrase.filter((character) => character !== ' ').map((character) => {
     const element = document.createElement('span');
-    element.textContent = word;
+    element.textContent = character;
     letterLayer.append(element);
     return element;
   });
   const travelTime = 1240;
   const leadIn = 800;
-  let spacing = 300;
+  let launchDelays: number[] = letters.map(() => 0);
+  let flightSpan = 0;
   let originX = 0;
   let originY = 0;
   let rotation = 0;
@@ -81,8 +82,25 @@ if (demo) {
     originX = startX;
     originY = startY;
     if (recalculateSpacing) {
-      const wordWidth = Math.max(...words.map((word) => word.offsetWidth));
-      spacing = Math.max(180, travelTime * (wordWidth + 18) / (pathLength * width / 1896));
+      // Pack each word with a small gap, retaining a larger gap at spaces.
+      const centers: number[] = [];
+      const compactGap = scene.clientWidth < 600 ? 3 : 5;
+      const wordGap = scene.clientWidth < 600 ? 10 : 16;
+      let distance = 0;
+      let index = 0;
+      phrase.forEach((character) => {
+        if (character === ' ') {
+          distance += wordGap;
+          return;
+        }
+        const letterWidth = letters[index++].getBoundingClientRect().width;
+        centers.push(distance + letterWidth * .5);
+        distance += letterWidth + compactGap;
+      });
+      const lastCenter = centers[centers.length - 1];
+      const millisecondsPerPixel = travelTime / (pathLength * width / 1896);
+      launchDelays = centers.map((center) => (lastCenter - center) * millisecondsPerPixel);
+      flightSpan = launchDelays[0];
     }
     trail.style.left = `${startX}px`;
     trail.style.top = `${startY}px`;
@@ -102,12 +120,12 @@ if (demo) {
     recorderSway = Math.sin(recorderPhase) * 1.2 * Math.PI / 180;
     recorder.style.transform = `translateY(${recorderLift}px) rotate(${recorderSway}rad)`;
     noteWindow.style.transform = `translateY(${Math.sin(notePhase) * 10}px) perspective(900px) rotateY(-10deg) rotateZ(${Math.sin(notePhase) * .8}deg)`;
-    // Update both tips before positioning words on the same moving trail.
+    // Update both tips before positioning letters on the same moving trail.
     layoutTrail();
     // ±10 CSS px in the middle; the map is exactly neutral at both tips.
     const displacement = Math.sin(phase) * 20 * 1896 / trailWidth;
     bend.setAttribute('scale', String(displacement));
-    const flightEnd = leadIn + travelTime + (words.length - 1) * spacing;
+    const flightEnd = leadIn + travelTime + flightSpan;
     const writeTime = phrase.length * 60;
     const eraseStart = flightEnd + writeTime + 3000;
     const cycleTime = eraseStart + phrase.length * 28 + 200;
@@ -121,11 +139,11 @@ if (demo) {
     }
     demo.dataset.state = time < flightEnd ? 'flying' : time >= eraseStart
       ? 'erasing' : count < phrase.length ? 'writing' : 'ready';
-    words.forEach((word, index) => {
+    letters.forEach((letter, index) => {
       // Keep the phrase readable from left to right as it moves to the right.
-      const progress = (time - leadIn - (words.length - 1 - index) * spacing) / travelTime;
+      const progress = (time - leadIn - launchDelays[index]) / travelTime;
       if (progress < 0 || progress >= 1 || time >= flightEnd) {
-        word.style.opacity = '0';
+        letter.style.opacity = '0';
         return;
       }
       const point = path.getPointAtLength(progress * pathLength);
@@ -138,8 +156,8 @@ if (demo) {
       const y = (yOnWave - 640) * trailWidth / 1896;
       const screenX = originX + x * Math.cos(rotation) - y * Math.sin(rotation);
       const screenY = originY + x * Math.sin(rotation) + y * Math.cos(rotation);
-      word.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%)`;
-      word.style.opacity = String(Math.min(1, progress * 15, (1 - progress) * 18));
+      letter.style.transform = `translate3d(${screenX}px, ${screenY}px, 0) translate(-50%, -50%)`;
+      letter.style.opacity = String(Math.min(1, progress * 15, (1 - progress) * 18));
     });
     frame = requestAnimationFrame(tick);
   };
@@ -158,7 +176,7 @@ if (demo) {
       note.textContent = phrase.join('');
       previousCount = -1;
       demo.dataset.state = 'ready';
-      words.forEach((word) => { word.style.opacity = '0'; });
+      letters.forEach((letter) => { letter.style.opacity = '0'; });
     }
     if (!paused) frame = requestAnimationFrame(tick);
   };
