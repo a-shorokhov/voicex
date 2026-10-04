@@ -45,7 +45,8 @@
 .steps .glass-pill{--rest-tilt:-5deg;animation:stepFloat 8.6s ease-in-out infinite}
 .steps .glass-stop{--rest-tilt:0deg;animation:stepFloat 9.8s ease-in-out -3s infinite}
 .steps .mini-note{--rest-tilt:4deg;animation:stepFloat 10.4s ease-in-out -5s infinite}
-@keyframes stepFloat{0%,100%{transform:translateY(6px) rotate(calc(var(--rest-tilt) - 1.2deg))}50%{transform:translateY(-8px) rotate(calc(var(--rest-tilt) + 1.2deg))}}
+@keyframes stepFloat{0%,100%{transform:translateY(10px) rotate(calc(var(--rest-tilt) - 2deg))}50%{transform:translateY(-14px) rotate(calc(var(--rest-tilt) + 2deg))}}
+.trajectory-letters span{white-space:nowrap}
 
 /* Keep the closed FAQ and final call to action within a laptop screen. */
 @media(min-width:801px){
