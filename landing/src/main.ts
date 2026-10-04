@@ -57,11 +57,17 @@ if (demo) {
   let trailWidth = 460;
   let phase = 0;
   let lastFrame = 0;
+  let recorderSway = 0;
+  let recorderLift = 0;
 
   const layoutTrail = (): void => {
-    // Attach the luminous tip to the capsule's upper-right border.
-    const startX = recorder.offsetLeft + recorder.offsetWidth - recorder.offsetHeight * .5;
-    const startY = recorder.offsetTop;
+    // Rotate the attachment point with the capsule, keeping it on its border.
+    const localX = (recorder.offsetWidth - recorder.offsetHeight) * .5;
+    const localY = -recorder.offsetHeight * .5;
+    const startX = recorder.offsetLeft + recorder.offsetWidth * .5
+      + localX * Math.cos(recorderSway) - localY * Math.sin(recorderSway);
+    const startY = recorder.offsetTop + recorder.offsetHeight * .5 + recorderLift
+      + localX * Math.sin(recorderSway) + localY * Math.cos(recorderSway);
     const sceneBounds = scene.getBoundingClientRect();
     const noteBounds = noteWindow.getBoundingClientRect();
     const endX = noteBounds.left - sceneBounds.left + noteBounds.width * .46;
@@ -87,6 +93,14 @@ if (demo) {
       elapsed += delta;
     }
     lastFrame = timestamp;
+    const recorderPhase = elapsed / 8600 * Math.PI * 2;
+    const notePhase = elapsed / 10400 * Math.PI * 2;
+    recorderLift = Math.sin(recorderPhase) * 4;
+    recorderSway = Math.sin(recorderPhase) * .6 * Math.PI / 180;
+    recorder.style.transform = `translateY(${recorderLift}px) rotate(${recorderSway}rad)`;
+    noteWindow.style.transform = `translateY(${Math.sin(notePhase) * 5}px) perspective(900px) rotateY(-10deg) rotateZ(${Math.sin(notePhase) * .4}deg)`;
+    // Update both tips before positioning letters on the same moving trail.
+    layoutTrail();
     // ±10 CSS px in the middle; the map is exactly neutral at both tips.
     const displacement = Math.sin(phase) * 20 * 1896 / trailWidth;
     bend.setAttribute('scale', String(displacement));
@@ -132,6 +146,11 @@ if (demo) {
     const paused = motion.matches || document.hidden || !visible;
     demo.classList.toggle('motion-paused', paused);
     if (motion.matches) {
+      recorderLift = 0;
+      recorderSway = 0;
+      recorder.style.removeProperty('transform');
+      noteWindow.style.removeProperty('transform');
+      layoutTrail();
       bend.setAttribute('scale', '0');
       note.textContent = phrase.join('');
       previousCount = -1;
@@ -155,6 +174,17 @@ if (demo) {
 const how = document.querySelector<HTMLElement>('.how-section');
 if (how) {
   const steps = Array.from(how.querySelectorAll<HTMLElement>('[data-step]'));
+  const note = how.querySelector<HTMLElement>('.mini-note p')!;
+  const phrase = Array.from('Давай обсудим идею завтра.');
+  const text = document.createElement('span');
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  cursor.setAttribute('aria-hidden', 'true');
+  note.replaceChildren(text, cursor);
+  const writeTime = phrase.length * 60;
+  const eraseStart = 4400 + writeTime + 2000;
+  const cycleTime = eraseStart + phrase.length * 28 + 200;
+  let previousCount = -1;
   const motion = globalThis.matchMedia('(prefers-reduced-motion: reduce)');
   let visible = false;
   let frame = 0;
@@ -163,8 +193,17 @@ if (how) {
   const tick = (timestamp: number): void => {
     if (lastFrame) elapsed += timestamp - lastFrame;
     lastFrame = timestamp;
-    const active = Math.floor(elapsed / 2200) % steps.length;
+    const time = elapsed % cycleTime;
+    const active = time < 2200 ? 0 : time < 4400 ? 1 : 2;
     steps.forEach((step, index) => step.classList.toggle('is-active', index === active));
+    const count = time < 4400 ? 0 : time < eraseStart
+      ? Math.min(phrase.length, Math.floor((time - 4400) / 60))
+      : Math.max(0, phrase.length - Math.floor((time - eraseStart) / 28));
+    cursor.hidden = active !== 2;
+    if (count !== previousCount) {
+      text.textContent = phrase.slice(0, count).join('');
+      previousCount = count;
+    }
     frame = requestAnimationFrame(tick);
   };
   const synchronize = (): void => {
@@ -172,7 +211,12 @@ if (how) {
     lastFrame = 0;
     const paused = motion.matches || document.hidden || !visible;
     how.classList.toggle('motion-paused', paused);
-    if (motion.matches) steps.forEach((step) => step.classList.remove('is-active'));
+    if (motion.matches) {
+      steps.forEach((step) => step.classList.remove('is-active'));
+      text.textContent = phrase.join('');
+      cursor.hidden = true;
+      previousCount = -1;
+    }
     if (!paused) frame = requestAnimationFrame(tick);
   };
   new IntersectionObserver(([entry]) => {
