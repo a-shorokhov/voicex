@@ -21,12 +21,48 @@ struct SoftButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 14, weight: .medium))
-            .padding(.horizontal, 22).padding(.vertical, 12)
+            .padding(.horizontal, 18).padding(.vertical, 10)
             .foregroundStyle(primary ? Color.white : forest)
             .background(primary ? forest : Color.white.opacity(0.35), in: Capsule())
             .overlay(Capsule().strokeBorder(primary ? Color.clear : forest.opacity(0.12), lineWidth: 1))
             .opacity(enabled ? (configuration.isPressed ? 0.7 : 1) : 0.4)
             .contentShape(Capsule())
+    }
+}
+struct NavigationItem: View {
+    let section: Section
+    let selected: Bool
+    let selectionAnimation: Namespace.ID
+    let action: () -> Void
+    @State private var hovered = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: section.symbol).font(.system(size: 16)).frame(width: 20)
+                Text(section.rawValue).font(.system(size: 13, weight: selected ? .medium : .regular))
+                    .lineLimit(1).minimumScaleFactor(0.9)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(selected ? forest : forest.opacity(hovered ? 0.9 : 0.62))
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(sage.opacity(hovered ? 0.12 : 0))
+                    if selected {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(sage.opacity(0.25))
+                            .matchedGeometryEffect(id: "selection", in: selectionAnimation)
+                    }
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+        .onHover { hovered = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: hovered)
+        .accessibilityIdentifier("nav-\(section.id)")
     }
 }
 struct MainView: View {
@@ -35,16 +71,17 @@ struct MainView: View {
     @AppStorage("activationMode") private var mode = "Нажатие"
     @AppStorage("shortcutPreview") private var shortcut = "⌃ ⇧ Space"
     @State private var showShortcut = false
+    @Namespace private var navigationAnimation
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showRemoval = false
     @State private var showHistoryClear = false
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     var body: some View {
-        HStack(spacing: 0) {
-            sidebar.frame(width: 264)
-            Rectangle().fill(forest.opacity(0.08)).frame(width: 1)
-            ScrollView {
-                VStack(alignment: .leading, spacing: 26) {
-                    header
+        HStack(spacing: 16) {
+            sidebar.frame(width: 244)
+            VStack(alignment: .leading, spacing: 18) {
+                header
+                Group {
                     switch model.section {
                     case .dictation: dictation
                     case .settings: settings
@@ -52,16 +89,25 @@ struct MainView: View {
                     case .history: history
                     case .onboarding: onboarding
                     }
-                    Spacer(minLength: 12)
-                    Label("Демонстрация интерфейса · микрофон не используется", systemImage: "info.circle")
-                        .font(.system(size: 12)).foregroundStyle(forest.opacity(0.55))
                 }
-                .padding(34).padding(.top, 16)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .id(model.section)
+                .transition(.opacity)
+                Label("Демонстрация интерфейса · микрофон не используется", systemImage: "info.circle")
+                    .font(.system(size: 11)).foregroundStyle(forest.opacity(0.5))
             }
-            .background(ivory.opacity(reduceTransparency ? 1 : 0.86))
+            .padding(.horizontal, 20).padding(.vertical, 24)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .background { if reduceTransparency { ivory } else { FrostedSurface() } }
+        .padding(12)
+        .background {
+            if reduceTransparency { ivory }
+            else {
+                FrostedSurface()
+                ivory.opacity(0.78)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.16), value: model.section)
         .tint(forest)
         .overlay(alignment: .bottomTrailing) {
             if model.busy { hud.padding(24) }
@@ -75,50 +121,73 @@ struct MainView: View {
         .confirmationDialog("Очистить историю?", isPresented: $showHistoryClear) {
             Button("Очистить", role: .destructive) { model.history.removeAll() }
         }
-        .sheet(isPresented: $showShortcut) {
-            VStack(alignment: .leading, spacing: 20) {
-                Text("Горячая клавиша").font(.title2.weight(.semibold))
-                Text("Выберите комбинацию для макета. Глобальная обработка клавиш будет подключена вместе с диктовкой.")
-                    .foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                Picker("Комбинация", selection: $shortcut) {
-                    Text("⌃ ⇧ Space").tag("⌃ ⇧ Space")
-                    Text("⌥ Space").tag("⌥ Space")
-                    Text("⌃ ⌥ D").tag("⌃ ⌥ D")
-                }.pickerStyle(.segmented)
-                Button("Готово") { showShortcut = false }.buttonStyle(SoftButton(primary: true))
-            }.padding(30).frame(width: 440)
-        }
     }
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Voicex").font(.system(size: 38, weight: .medium, design: .serif))
-                .foregroundStyle(forest).padding(.horizontal, 18).padding(.top, 46).padding(.bottom, 26)
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Voicex").font(.system(size: 30, weight: .medium, design: .serif))
+                .foregroundStyle(forest).padding(.horizontal, 12).padding(.top, 30).padding(.bottom, 22)
             ForEach(Section.allCases) { section in
-                Button { model.section = section } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: section.symbol).font(.system(size: 19)).frame(width: 24)
-                        Text(section.rawValue).font(.system(size: 13, weight: model.section == section ? .medium : .regular)).lineLimit(1).minimumScaleFactor(0.9)
-                        Spacer(minLength: 0)
-                    }
-                    .foregroundStyle(model.section == section ? forest : forest.opacity(0.7))
-                    .padding(.horizontal, 16).padding(.vertical, 16)
-                    .background(model.section == section ? sage.opacity(0.24) : .clear, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
-                    .contentShape(RoundedRectangle(cornerRadius: 17))
-                }.buttonStyle(.plain).accessibilityIdentifier("nav-\(section.id)")
+                NavigationItem(section: section, selected: model.section == section, selectionAnimation: navigationAnimation) {
+                    showShortcut = false
+                    model.section = section
+                }
             }
             Spacer()
-            Divider().padding(.horizontal, 16)
-            Label("Локально на Mac", systemImage: "lock").font(.system(size: 13))
-                .foregroundStyle(forest.opacity(0.6)).padding(.horizontal, 18).padding(.top, 16)
-            Text("Voicex 0.1.0 · UI preview").font(.system(size: 11)).foregroundStyle(forest.opacity(0.45))
-                .padding(.leading, 47).padding(.bottom, 22)
-        }.padding(.horizontal, 12).background(sage.opacity(0.13))
+            Divider().padding(.horizontal, 12)
+            Label("Локально на Mac", systemImage: "lock").font(.system(size: 12))
+                .foregroundStyle(forest.opacity(0.6)).padding(.horizontal, 12).padding(.top, 14)
+            Text("Voicex 0.1.0").font(.system(size: 11)).foregroundStyle(forest.opacity(0.45))
+                .padding(.leading, 36).padding(.top, 4).padding(.bottom, 18)
+        }
+        .padding(.horizontal, 10)
+        .frame(maxHeight: .infinity)
+        .background {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(reduceTransparency ? Color(red: 0.88, green: 0.91, blue: 0.83) : sage.opacity(0.18))
+        }
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(.white.opacity(0.55), lineWidth: 1))
+    }
+    private var shortcutControl: some View {
+        Button { showShortcut.toggle() } label: {
+            HStack(spacing: 12) {
+                Text(shortcut)
+                Image(systemName: "chevron.up.chevron.down").font(.system(size: 10))
+            }
+        }
+        .buttonStyle(SoftButton())
+        .accessibilityLabel("Сочетание клавиш: \(shortcut)")
+        .popover(isPresented: $showShortcut, arrowEdge: .trailing) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Сочетание клавиш").font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.secondary).padding(.horizontal, 10).padding(.vertical, 8)
+                ForEach(["⌃ ⇧ Space", "⌥ Space", "⌃ ⌥ D"], id: \.self) { value in
+                    Button {
+                        shortcut = value
+                        showShortcut = false
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "checkmark").opacity(shortcut == value ? 1 : 0).frame(width: 14)
+                            Text(value).font(.system(size: 14))
+                            Spacer()
+                        }
+                        .foregroundStyle(forest).padding(10)
+                        .background(shortcut == value ? sage.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(Rectangle())
+                    }.buttonStyle(.plain)
+                }
+                Divider().padding(.vertical, 4)
+                Text("Глобальные клавиши подключим на этапе записи голоса.")
+                    .font(.system(size: 11)).foregroundStyle(.secondary).padding(.horizontal, 10).padding(.bottom, 8)
+            }
+            .padding(8).frame(width: 236)
+            .background(.regularMaterial)
+        }
     }
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(model.section == .dictation ? "Проверим диктовку" : model.section.rawValue)
-                    .font(.system(size: 32, weight: .medium, design: .serif)).foregroundStyle(forest)
+                    .font(.system(size: 29, weight: .medium, design: .serif)).foregroundStyle(forest)
                 Spacer()
                 if model.section == .dictation {
                     Label(model.modelReady ? "Модель готова · демо" : "Нет модели", systemImage: "circle.fill")
@@ -139,16 +208,15 @@ struct MainView: View {
         }
     }
     private var dictation: some View {
-        VStack(spacing: 20) {
-            VStack(spacing: 16) {
-                Image(systemName: "mic.fill").font(.system(size: 44)).foregroundStyle(sage)
-                    .frame(width: 112, height: 112)
+        VStack(spacing: 16) {
+            VStack(spacing: 12) {
+                Image(systemName: "mic.fill").font(.system(size: 36)).foregroundStyle(sage)
+                    .frame(width: 90, height: 90)
                     .background(sage.opacity(0.12), in: Circle())
                     .overlay(Circle().strokeBorder(.white.opacity(0.8), lineWidth: 2))
                 Text(model.recording ? "Запись · \(time)" : model.processing ? "Распознаём…" : model.modelReady ? "Готово к проверке" : "Сначала установите модель")
                     .foregroundStyle(forest).font(.system(size: 15))
-                Text(shortcut).font(.system(size: 15, weight: .medium)).padding(.horizontal, 20).padding(.vertical, 10)
-                    .background(.white.opacity(0.35), in: Capsule())
+                shortcutControl
                 if model.modelReady {
                     Button(model.recording ? "Остановить проверку" : "Начать проверку") {
                         if model.recording { model.stop() } else { model.start() }
@@ -158,7 +226,7 @@ struct MainView: View {
                 }
                 Text("Сейчас проверяем состояния интерфейса, без записи голоса.")
                     .font(.system(size: 12)).foregroundStyle(.secondary)
-            }.frame(maxWidth: .infinity).padding(.vertical, 12)
+            }.frame(maxWidth: .infinity).padding(.vertical, 8)
             Divider()
             VStack(alignment: .leading, spacing: 14) {
                 Text("Результат проверки").font(.system(size: 15)).foregroundStyle(.secondary)
@@ -174,13 +242,13 @@ struct MainView: View {
         }
     }
     private var settings: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
             row("Язык распознавания") {
                 Picker("Язык", selection: $language) { ForEach(["Auto", "RU", "EN"], id: \.self) { Text($0) } }
                     .labelsHidden().pickerStyle(.segmented).frame(width: 270)
             }
             Divider()
-            row("Горячая клавиша") { Button(shortcut) { showShortcut = true }.buttonStyle(SoftButton()) }
+            row("Горячая клавиша") { shortcutControl }
             Divider()
             row("Режим записи") {
                 Picker("Режим", selection: $mode) { ForEach(["Нажатие", "Удержание"], id: \.self) { Text($0) } }
@@ -200,8 +268,8 @@ struct MainView: View {
         }
     }
     private var models: some View {
-        VStack(alignment: .leading, spacing: 26) {
-            VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 18) {
                     Image(systemName: "waveform").font(.system(size: 32)).foregroundStyle(sage)
                         .frame(width: 64, height: 64).background(sage.opacity(0.12), in: RoundedRectangle(cornerRadius: 20))
@@ -230,7 +298,7 @@ struct MainView: View {
         }
     }
     private var history: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
             Toggle("Сохранять тестовые результаты в этой сессии", isOn: $model.historyEnabled).toggleStyle(.switch)
             Text("По умолчанию выключено. В каркасе история живёт только в памяти и исчезнет после выхода.")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
@@ -247,15 +315,22 @@ struct MainView: View {
                     }.buttonStyle(SoftButton())
                 }.frame(maxWidth: .infinity).padding(.vertical, 38)
             } else {
-                ForEach(model.history) { item in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(item.text).textSelection(.enabled)
-                            Text(item.date, style: .time).font(.system(size: 11)).foregroundStyle(.secondary)
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(model.history) { item in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(item.text).textSelection(.enabled)
+                                    Text(item.date, style: .time).font(.system(size: 11)).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Button { model.copy(item.text) } label: { Image(systemName: "doc.on.doc") }
+                                    .buttonStyle(SoftButton())
+                            }
+                            .padding(18)
+                            .background(.white.opacity(0.35), in: RoundedRectangle(cornerRadius: 18))
                         }
-                        Spacer()
-                        Button { model.copy(item.text) } label: { Image(systemName: "doc.on.doc") }.buttonStyle(SoftButton())
-                    }.padding(18).background(.white.opacity(0.35), in: RoundedRectangle(cornerRadius: 18))
+                    }
                 }
                 Button("Очистить историю") { showHistoryClear = true }.buttonStyle(SoftButton())
             }
