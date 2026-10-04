@@ -1,0 +1,17 @@
+{
+  "name": "voicex-landing",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "check": "tsc --noEmit",
+    "build": "npm run check && vite build"
+  },
+  "engines": { "node": ">=24 <25" },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^7.1.12"
+  }
+}

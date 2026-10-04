@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eff0dc">
+  <title>Voicex — локальная диктовка для Mac</title>
+  <meta name="description" content="Говорите — Voicex превращает речь в текст на вашем Mac. Локальный Whisper, русский и английский, Apple Silicon и macOS 14+.">
+  <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg">
+  <link rel="stylesheet" href="./src/style.css">
+  <link rel="preload" as="image" href="%BASE_URL%assets/hero.webp" fetchpriority="high">
+</head>
+<body>
+  <a class="skip-link" href="#main">К содержанию</a>
+  <main id="main">
+  <div class="hero-shell" data-demo data-state="ready">
+    <img class="hero-art" src="%BASE_URL%assets/hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
+    <header class="site-header wrap">
+      <a class="brand" href="%BASE_URL%" aria-label="Voicex — главная"><span class="leaf-mark" aria-hidden="true"></span>Voicex</a>
+      <nav aria-label="Основная навигация">
+        <a href="#how">Как работает</a><a href="%BASE_URL%install.html">Установка</a><a href="%BASE_URL%privacy.html">Приватность</a>
+      </nav>
+      <span class="header-caption">Сделано для Mac <span aria-hidden="true">↗</span></span>
+    </header>
+      <section class="hero wrap" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> Ваш голос. Ваш Mac.</p>
+          <h1 id="hero-title">Voicex</h1>
+          <p class="hero-heading">Говорите. Текст <br>появится на Mac.</p>
+          <p class="hero-description">Локальная диктовка для macOS. <br>Мысли — словами, слова — текстом.</p>
+          <div class="hero-actions">
+            <span class="button button-primary release-pending" data-release><span class="status-dot" aria-hidden="true"></span>Релиз готовится</span>
+            <a class="text-link" href="#how">Как это работает <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="requirements">Apple Silicon M1+ <span aria-hidden="true">·</span> macOS 14+</p>
+        </div>
+        <div class="voice-scene" aria-label="Визуальная демонстрация превращения речи в текст">
+          <div class="letter-trail" aria-hidden="true">
+            <span>Д</span><span>а</span><span>в</span><span>а</span><span>й</span><span>о</span><span>б</span><span>с</span><span>у</span><span>д</span><span>и</span><span>м</span>
+          </div>
+          <div class="note-window">
+            <div class="note-toolbar" aria-hidden="true"><span class="window-dots"><i></i><i></i><i></i></span><span class="note-app">Заметка</span><span>Аа</span></div>
+            <div class="note-body"><p><span data-demo-text>Давай обсудим идею завтра.</span><span class="cursor" aria-hidden="true"></span></p></div>
+            <div class="note-foot"><span class="tiny-leaf" aria-hidden="true">↳</span> Распознано на Mac</div>
+          </div>
+          <button class="recorder" type="button" data-demo-trigger aria-label="Посмотреть демонстрацию диктовки" hidden>
+            <span class="record-light" aria-hidden="true"></span>
+            <span class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="recorder-label" data-demo-label>Посмотреть демо</span>
+          </button>
+          <span class="scene-caption">От мысли — к тексту.</span>
+        </div>
+        <div class="hero-bottom"><span>Русский и английский <span aria-hidden="true">/</span> RU + EN</span><button class="motion-toggle" type="button" data-motion-toggle aria-pressed="false" hidden><span>Пауза анимации</span><span aria-hidden="true">Ⅱ</span></button></div>
+        <p class="sr-only" aria-live="polite" role="status" data-demo-status>Это демонстрация — микрофон не используется.</p>
+      </section>
+  </div>
+      <section class="how-section" id="how" aria-labelledby="how-title">
+        <div class="wrap">
+          <div class="section-heading"><div><p class="eyebrow">Три простых шага</p><h2 id="how-title">От голоса к тексту</h2></div><p>Простой и естественный процесс. <br>Без лишнего между вами и мыслью.</p></div>
+          <ol class="steps">
+            <li data-step="1"><div class="step-copy"><span class="step-number">01</span><div><h3>Запишите</h3><p>Нажмите горячую клавишу <br>и говорите в своём темпе.</p></div></div><div class="step-object"><span class="glass-pill"><span class="record-light" aria-hidden="true"></span><span class="waveform small" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></span></div></li>
+            <li data-step="2"><div class="step-copy"><span class="step-number">02</span><div><h3>Остановите</h3><p>Нажмите ещё раз — Voicex <br>распознает запись на Mac.</p></div></div><div class="step-object"><span class="glass-stop" aria-hidden="true"><span></span></span></div></li>
+            <li data-step="3"><div class="step-copy"><span class="step-number">03</span><div><h3>Получите текст</h3><p>В исходном поле или <br>для ручного копирования.</p></div></div><div class="step-object"><div class="mini-note"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><p>Давай обсудим <br>идею завтра.</p></div></div></li>
+          </ol>
+          <p class="how-footnote">Сначала установите модель в приложении. После этого для диктовки не нужен интернет.</p>
+        </div>
+      </section>
+      <section class="privacy-section" aria-labelledby="privacy-title">
+        <img class="privacy-art" src="%BASE_URL%assets/privacy.webp" alt="Концептуальная иллюстрация Apple Silicon в прозрачном зелёном корпусе" width="1536" height="1024" loading="lazy">
+        <div class="wrap privacy-content"><p class="eyebrow">Локально. Спокойно. По-вашему.</p><h2 id="privacy-title">Ваш голос <br>остаётся на Mac</h2><p class="privacy-intro">Распознавание работает локально <br>после установки модели.</p>
+          <ul class="privacy-points"><li><span class="line-icon icon-lock" aria-hidden="true"></span><span>Аудио и текст не отправляются <br>на сервер разработчика</span></li><li><span class="line-icon icon-offline" aria-hidden="true">↯</span><span>Диктуйте без интернета <br>после установки модели</span></li><li><span class="line-icon icon-memory" aria-hidden="true">≋</span><span>Без постоянной истории <br>и сохранённых аудиозаписей</span></li></ul>
+          <a class="text-link" href="%BASE_URL%privacy.html">Подробнее о данных <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+      <section class="essentials wrap" aria-labelledby="essentials-title"><div class="section-heading"><div><p class="eyebrow">В вашем ритме</p><h2 id="essentials-title">Всё нужное. <br>Ничего лишнего.</h2></div><p>Маленькое приложение, <br>которое всегда под рукой.</p></div><div class="essentials-row"><article><span class="feature-symbol" aria-hidden="true">⌃ ⇧ ␣</span><h3>Одна комбинация</h3><p>Control + Shift + Space по умолчанию. Удерживайте или нажимайте дважды — как удобнее.</p></article><article><span class="feature-symbol languages" aria-hidden="true">Аа / Aa</span><h3>Русский и английский</h3><p>Автоопределение или выбор языка. Распознавание речи локальной моделью Whisper.</p></article><article><span class="feature-symbol" aria-hidden="true">⌘ V</span><h3>Текст там, где нужен</h3><p>Вставка в подтверждённое исходное поле. Если фокус изменился — результат для копирования.</p></article></div></section>
+      <section class="first-start"><div class="wrap first-start-inner"><div><p class="eyebrow">Первое знакомство</p><h2>Пара минут <br>на знакомство с Voicex.</h2><p>Перенесите приложение в Applications, выдайте разрешения <br>и установите модель. Подготовка модели может занять время.</p></div><a class="button button-outline" href="%BASE_URL%install.html">Инструкция установки <span aria-hidden="true">↗</span></a></div></section>
+      <section class="faq-section wrap" aria-labelledby="faq-title"><div class="faq-heading"><p class="eyebrow">Если интересно</p><h2 id="faq-title">Хорошие <br>вопросы.</h2></div><div class="faq-list">
+        <details><summary>На каких Mac это работает?</summary><p>Voicex рассчитан на Apple Silicon M1 и новее с macOS 14 или новее. Интерфейс приложения — на русском языке.</p></details>
+        <details><summary>Нужен ли интернет?</summary><p>Для получения приложения и установки модели — да. После установки модели и токенизатора распознавание работает на вашем Mac без интернета.</p></details>
+        <details><summary>Зачем скачивать модель?</summary><p>Модель Whisper распознаёт речь прямо на устройстве. Она устанавливается кнопкой в Voicex и хранится отдельно от приложения. Загрузка и первая подготовка могут занять время.</p></details>
+        <details><summary>Какие языки поддерживаются?</summary><p>В MVP предусмотрены русский и английский. Можно выбрать Auto, ru или en. Качество зависит от речи и записи; смешение языков не гарантирует точного результата.</p></details>
+        <details><summary>Какие разрешения нужны?</summary><p>Микрофон — для записи, Универсальный доступ (Accessibility) — для автоматической вставки. Без Accessibility можно распознать речь и скопировать результат вручную. Screen Recording не нужен.</p></details>
+        <details><summary>Почему текст иногда нужно копировать?</summary><p>Voicex проверяет исходное приложение и поле. Если вы сменили фокус, поле защищено или цель нельзя подтвердить, автоматической вставки не будет. Текст остаётся доступен для копирования.</p></details>
+        <details><summary>Почему macOS предупреждает при запуске?</summary><p>Первая сборка не имеет Developer ID и нотариализации Apple. Порядок ручного запуска описан в <a href="%BASE_URL%install.html#first-launch">инструкции установки</a>.</p></details>
+      </div></section>
+      <section class="closing wrap"><span class="leaf-mark" aria-hidden="true"></span><h2>Дайте мысли голос.</h2><p>Остальное — на вашем Mac.</p><span class="button button-primary release-pending" data-release>Релиз готовится</span><p class="release-note" data-release-note>Публичный установщик пока не доступен.</p></section>
+    </main>
+    <footer class="site-footer wrap"><a class="brand" href="%BASE_URL%"><span class="leaf-mark" aria-hidden="true"></span>Voicex</a><nav aria-label="Навигация в подвале"><a href="#how">Как работает</a><a href="%BASE_URL%install.html">Установка</a><a href="%BASE_URL%privacy.html">Приватность</a></nav><span>Локальная диктовка для Mac · 2026</span></footer>
+    <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
