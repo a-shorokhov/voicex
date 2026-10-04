@@ -34,14 +34,18 @@
 .recorder{pointer-events:none;cursor:default}
 .note-window{animation:none;transform:perspective(900px) rotateY(-10deg);transform-origin:center}
 
-/* Emerald light blooms through the glass in sync with the active green step. */
+/* Warm light blooms through the glass in sync with the active green step. */
 .steps :is(.glass-pill,.glass-stop){position:relative;isolation:isolate;transition:border-color .9s ease-in-out}
-.steps :is(.glass-pill,.glass-stop):before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 32% 24%,#d6efb880,transparent 72%),linear-gradient(135deg,#80b87059,#39875b59);box-shadow:inset 0 0 0 1px #9bce8de6,inset 0 0 26px #4d9b6973,0 0 26px #47976866,0 0 54px #72ad5840;transition:opacity .9s ease-in-out}
-.steps .is-active :is(.glass-pill,.glass-stop){border-color:#8cbb79}
+.steps :is(.glass-pill,.glass-stop):before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 32% 24%,#ffe2ad80,transparent 72%),linear-gradient(135deg,#ffc05d59,#ff853d66);box-shadow:inset 0 0 0 1px #ffcb87e6,inset 0 0 26px #ff994d73,0 0 26px #ff964a73,0 0 54px #ffb13740;transition:opacity .9s ease-in-out}
+.steps .is-active :is(.glass-pill,.glass-stop){border-color:#ffc078}
 .steps .is-active :is(.glass-pill,.glass-stop):before{opacity:1}
 .mini-note p{min-height:2.8em}
 .mini-note .cursor{height:1em;vertical-align:-.12em;margin-left:2px}
 .mini-note .cursor[hidden]{display:none}
+.steps .glass-pill{--rest-tilt:-5deg;animation:stepFloat 8.6s ease-in-out infinite}
+.steps .glass-stop{--rest-tilt:0deg;animation:stepFloat 9.8s ease-in-out -3s infinite}
+.steps .mini-note{--rest-tilt:4deg;animation:stepFloat 10.4s ease-in-out -5s infinite}
+@keyframes stepFloat{0%,100%{transform:translateY(6px) rotate(calc(var(--rest-tilt) - 1.2deg))}50%{transform:translateY(-8px) rotate(calc(var(--rest-tilt) + 1.2deg))}}
 
 /* Keep the closed FAQ and final call to action within a laptop screen. */
 @media(min-width:801px){
