@@ -36,7 +36,19 @@
         </div>
         <div class="voice-scene" aria-hidden="true">
           <div class="magic-trajectory">
-            <img src="%BASE_URL%assets/white-magic-trajectory.png" alt="" width="1896" height="830" fetchpriority="high">
+            <svg class="magic-art" viewBox="0 0 1896 830" aria-hidden="true">
+              <defs>
+                <filter id="magic-bend" x="-5%" y="-20%" width="110%" height="140%" color-interpolation-filters="sRGB">
+                  <feImage href="%BASE_URL%assets/trajectory-displacement.svg" x="0" y="0" width="1896" height="830" preserveAspectRatio="none" result="bend-map"/>
+                  <feComponentTransfer in="bend-map" result="centered-map">
+                    <feFuncR type="table" tableValues=".5 .5"/>
+                    <feFuncG type="linear" slope="1" intercept="-.00196078431372549"/>
+                  </feComponentTransfer>
+                  <feDisplacementMap in="SourceGraphic" in2="centered-map" scale="0" xChannelSelector="R" yChannelSelector="G" data-trail-bend/>
+                </filter>
+              </defs>
+              <image href="%BASE_URL%assets/white-magic-trajectory.png" width="1896" height="830" filter="url(#magic-bend)"/>
+            </svg>
           </div>
           <div class="note-window">
             <div class="note-toolbar" aria-hidden="true"><span class="window-dots"><i></i><i></i><i></i></span><span class="note-app">Заметка</span><span>Аа</span></div>

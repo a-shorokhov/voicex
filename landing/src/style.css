@@ -24,11 +24,9 @@
 
 /* A responsive sound-to-text arc. Typography stays as sharp, real Cyrillic. */
 .magic-trajectory{position:absolute;z-index:4;pointer-events:none;transform-origin:0 0;--trail-width:460px;left:60%;top:460px;transform:rotate(-18deg)}
-.magic-trajectory img{position:absolute;max-width:none;width:var(--trail-width);height:auto;left:calc(var(--trail-width) * -.0342827);top:calc(var(--trail-width) * -.3375527);transform-origin:50% 60%;animation:magicSway 9s ease-in-out infinite;will-change:transform}
-@keyframes magicSway{0%,100%{transform:translateY(0) rotate(-.5deg);opacity:.88}50%{transform:translateY(-5px) rotate(.5deg);opacity:1}}
+.magic-art{position:absolute;overflow:visible;width:var(--trail-width);height:calc(var(--trail-width) * .4377637);left:calc(var(--trail-width) * -.0342827);top:calc(var(--trail-width) * -.3375527)}
 .recorder{pointer-events:none;cursor:default}
 .note-window{animation:none;transform:perspective(900px) rotateY(-10deg);transform-origin:center}
-@media(prefers-reduced-motion:reduce){.magic-trajectory img{animation:none;will-change:auto}}
 
 /* Keep the closed FAQ and final call to action within a laptop screen. */
 @media(min-width:801px){
