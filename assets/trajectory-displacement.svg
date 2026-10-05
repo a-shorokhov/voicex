@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1896" height="830" viewBox="0 0 1896 830">
+  <defs>
+    <linearGradient id="bend">
+      <stop offset="0" stop-color="#808080"/>
+      <stop offset=".12" stop-color="#808080"/>
+      <stop offset=".5" stop-color="#80ff80"/>
+      <stop offset=".88" stop-color="#808080"/>
+      <stop offset="1" stop-color="#808080"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#bend)" d="M0 0h1896v830H0z"/>
+</svg>
