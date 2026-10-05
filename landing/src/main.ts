@@ -3,15 +3,20 @@ import { release } from './release';
 import { trajectoryCenterline } from './trajectory-centerline';
 
 const publicURL = (value: string): boolean => {
-  try { return new URL(value).protocol === 'https:'; } catch { return false; }
+  try {
+    const url = new URL(value, document.baseURI);
+    return url.origin === location.origin || url.protocol === 'https:';
+  } catch { return false; }
 };
 
 if (release.available && publicURL(release.downloadURL) && publicURL(release.checksumURL)) {
   document.querySelectorAll<HTMLElement>('[data-release]').forEach((placeholder) => {
     const link = document.createElement('a');
     link.className = placeholder.className;
+    link.classList.remove('release-pending');
     link.href = release.downloadURL;
-    link.textContent = `Скачать для macOS ↗`;
+    link.download = 'Voicex-0.1.0-macos-arm64.dmg';
+    link.textContent = 'Скачать для Mac ↗';
     placeholder.replaceWith(link);
   });
   document.querySelectorAll<HTMLElement>('[data-release-note]').forEach((element) => {
@@ -69,10 +74,14 @@ if (demo) {
       + localX * Math.cos(recorderSway) - localY * Math.sin(recorderSway);
     const startY = recorder.offsetTop + recorder.offsetHeight * .5 + recorderLift
       + localX * Math.sin(recorderSway) + localY * Math.cos(recorderSway);
-    const sceneBounds = scene.getBoundingClientRect();
-    const noteBounds = noteWindow.getBoundingClientRect();
-    const endX = noteBounds.left - sceneBounds.left + noteBounds.width * .46;
-    const endY = noteBounds.top - sceneBounds.top + noteBounds.height * .58;
+    // Transform a fixed point in the note itself, including perspective.
+    // A fraction of its bounding box would slide as the window rotates.
+    const noteTransform = getComputedStyle(noteWindow).transform;
+    const noteMatrix = new DOMMatrix(noteTransform === 'none' ? undefined : noteTransform);
+    const notePoint = new DOMPoint(noteWindow.offsetWidth * -.04, noteWindow.offsetHeight * .08)
+      .matrixTransform(noteMatrix);
+    const endX = noteWindow.offsetLeft + noteWindow.offsetWidth * .5 + notePoint.x / notePoint.w;
+    const endY = noteWindow.offsetTop + noteWindow.offsetHeight * .5 + notePoint.y / notePoint.w;
     const dx = endX - startX;
     const dy = endY - startY;
     // Visible endpoints in the original 1896 × 830 PNG: (65, 640), (1830, 510).
@@ -116,10 +125,10 @@ if (demo) {
     lastFrame = timestamp;
     const recorderPhase = elapsed / 8600 * Math.PI * 2;
     const notePhase = elapsed / 10400 * Math.PI * 2;
-    recorderLift = Math.sin(recorderPhase) * 8;
-    recorderSway = Math.sin(recorderPhase) * 1.2 * Math.PI / 180;
+    recorderLift = Math.sin(recorderPhase) * 12;
+    recorderSway = Math.sin(recorderPhase) * 1.8 * Math.PI / 180;
     recorder.style.transform = `translateY(${recorderLift}px) rotate(${recorderSway}rad)`;
-    noteWindow.style.transform = `translateY(${Math.sin(notePhase) * 10}px) perspective(900px) rotateY(-10deg) rotateZ(${Math.sin(notePhase) * .8}deg)`;
+    noteWindow.style.transform = `translateY(${Math.sin(notePhase) * 15}px) perspective(900px) rotateY(-10deg) rotateZ(${Math.sin(notePhase) * 1.2}deg)`;
     // Update both tips before positioning letters on the same moving trail.
     layoutTrail();
     // ±10 CSS px in the middle; the map is exactly neutral at both tips.

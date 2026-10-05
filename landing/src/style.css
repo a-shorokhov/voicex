@@ -1,5 +1,12 @@
 @charset "UTF-8";
 
+.landing-page{-webkit-user-select:none;user-select:none}
+.landing-page :is(img,a){-webkit-user-drag:none}
+.privacy-content .text-link{margin-top:24px}
+.download-caption{font-size:10px;line-height:1.7;color:#516149;margin-top:12px}
+.download-caption a{text-decoration:underline;text-underline-offset:3px}
+.closing .download-caption{font-size:10px;margin-top:12px}
+
 :root{font-family:Arial,Helvetica,sans-serif;color:#143425;background:#fbf9ef;font-synthesis:none;--ink:#0d2f20;--green:#164b30;--muted:#626e60;--cream:#fbf9ef;--line:rgba(26,57,36,.18)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit}a{color:inherit;text-decoration:none}a:hover{color:#39753e}button,a,summary{touch-action:manipulation}a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid #386c36;outline-offset:6px}button:disabled{cursor:wait}button[hidden]{display:none!important}img{display:block;max-width:100%}h1,h2,h3,p{margin:0}h1,h2,.brand,.hero-heading{font-family:Georgia,'Times New Roman',serif;font-weight:400}h2{font-size:clamp(40px,5vw,70px);line-height:1.04;letter-spacing:-.052em;color:var(--ink)}h3{font-size:18px;font-weight:500;letter-spacing:-.03em}p{line-height:1.55}.wrap{width:min(1280px,calc(100% - 112px));margin-inline:auto}.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;line-height:1.5}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}.skip-link{position:fixed;top:12px;left:20px;z-index:20;background:var(--cream);padding:12px 20px;transform:translateY(-180%)}.skip-link:focus{transform:none}.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}.button{display:inline-flex;align-items:center;justify-content:center;gap:18px;min-height:53px;padding:15px 27px;border-radius:40px;font-size:14px;line-height:1.3;transition:background .25s,color .25s,transform .25s;border:1px solid transparent}.button-primary{background:var(--green);color:#fffaf0;box-shadow:0 5px 14px #22492b12}.button-primary .status-dot{background:#bbce87}.button-primary[href]:hover{background:#286740;color:#fff;transform:translateY(-2px)}.button-outline{border-color:#31523a;background:transparent}.button-outline:hover{background:#e9eddb}.release-pending{cursor:default}.text-link{display:inline-flex;align-items:center;gap:22px;font-size:13px;padding:6px 0;border-bottom:1px solid #6d826459;line-height:1.5}.text-link span{font-size:22px;line-height:1;transition:transform .25s}.text-link:hover span{transform:translate(2px,-2px)}
 
@@ -31,13 +38,15 @@
 .hero-shell[data-state='flying'] .cursor{visibility:hidden}
 @keyframes noteReveal{from{opacity:0;filter:blur(2px)}to{opacity:1;filter:blur(0)}}
 @media(max-width:600px){.trajectory-letters span{font-size:12px}}
-.recorder{pointer-events:none;cursor:default}
+.recorder{pointer-events:none;cursor:default;transition:box-shadow .3s}
 .note-window{animation:none;transform:perspective(900px) rotateY(-10deg);transform-origin:center}
 
 /* Warm light blooms through the glass in sync with the active green step. */
-.steps :is(.glass-pill,.glass-stop){position:relative;isolation:isolate;transition:border-color .9s ease-in-out}
+.steps :is(.glass-pill,.glass-stop){position:relative;isolation:isolate;transition:border-color .9s ease-in-out,background-color .9s ease-in-out}
+.steps .glass-pill{background:linear-gradient(140deg,#ffffff94,transparent);background-color:#dce5af74}
+.steps .glass-stop{background:linear-gradient(135deg,#ffffffa3,transparent);background-color:#d5e3ab67}
 .steps :is(.glass-pill,.glass-stop):before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 32% 24%,#ffe2ad80,transparent 72%),linear-gradient(135deg,#ffc05d59,#ff853d66);box-shadow:inset 0 0 0 1px #ffcb87e6,inset 0 0 26px #ff994d73,0 0 26px #ff964a73,0 0 54px #ffb13740;transition:opacity .9s ease-in-out}
-.steps .is-active :is(.glass-pill,.glass-stop){border-color:#ffc078}
+.steps .is-active :is(.glass-pill,.glass-stop){border-color:#ffc078;background-color:#fff2e1bf}
 .steps .is-active :is(.glass-pill,.glass-stop):before{opacity:1}
 .mini-note p{min-height:2.8em}
 .mini-note .cursor{height:1em;vertical-align:-.12em;margin-left:2px}

@@ -1,3 +1,4 @@
 node_modules/
 dist/
 .DS_Store
+!public/downloads/Voicex-0.1.0-macos-arm64.dmg

@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="./src/style.css">
   <link rel="preload" as="image" href="%BASE_URL%assets/hero.webp" fetchpriority="high">
 </head>
-<body>
+<body class="landing-page">
   <a class="skip-link" href="#main">К содержанию</a>
   <main id="main">
   <div class="hero-shell" data-demo data-state="ready">
@@ -20,7 +20,6 @@
       <nav aria-label="Основная навигация">
         <a href="#how">Как работает</a><a href="%BASE_URL%install.html">Установка</a><a href="%BASE_URL%privacy.html">Приватность</a>
       </nav>
-      <span class="header-caption">Сделано для Mac <span aria-hidden="true">↗</span></span>
     </header>
       <section class="hero wrap" aria-labelledby="hero-title">
         <div class="hero-copy">
@@ -29,10 +28,11 @@
           <p class="hero-heading">Говорите. Текст <br>появится на Mac.</p>
           <p class="hero-description">Локальная диктовка для macOS. <br>Мысли — словами, слова — текстом.</p>
           <div class="hero-actions">
-            <span class="button button-primary release-pending" data-release><span class="status-dot" aria-hidden="true"></span>Релиз готовится</span>
+            <a class="button button-primary" data-release href="%BASE_URL%downloads/Voicex-0.1.0-macos-arm64.dmg" download>Скачать для Mac ↗</a>
             <a class="text-link" href="#how">Как это работает <span aria-hidden="true">↗</span></a>
           </div>
           <p class="requirements">Apple Silicon M1+ <span aria-hidden="true">·</span> macOS 14+</p>
+          <p class="download-caption">0.1.0 · DMG, 3,15 МБ · <a href="%BASE_URL%downloads/SHA256SUMS.txt">SHA-256</a><br>Без заверения Apple · <a href="%BASE_URL%install.html#first-launch">Как открыть при первом запуске ↗</a></p>
         </div>
         <div class="voice-scene" aria-hidden="true">
           <div class="magic-trajectory">
@@ -61,7 +61,6 @@
             <span class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
           </div>
         </div>
-        <div class="hero-bottom"><span>Русский и английский <span aria-hidden="true">/</span> RU + EN</span></div>
       </section>
   </div>
       <section class="how-section" id="how" aria-labelledby="how-title">
@@ -93,7 +92,7 @@
         <details><summary>Почему текст иногда нужно копировать?</summary><p>Voicex проверяет исходное приложение и поле. Если вы сменили фокус, поле защищено или цель нельзя подтвердить, автоматической вставки не будет. Текст остаётся доступен для копирования.</p></details>
         <details><summary>Почему macOS предупреждает при запуске?</summary><p>Первая сборка не имеет Developer ID и нотариализации Apple. Порядок ручного запуска описан в <a href="%BASE_URL%install.html#first-launch">инструкции установки</a>.</p></details>
       </div></section>
-      <section class="closing wrap"><span class="leaf-mark" aria-hidden="true"></span><h2>Дайте мысли голос.</h2><p>Остальное — на вашем Mac.</p><span class="button button-primary release-pending" data-release>Релиз готовится</span><p class="release-note" data-release-note>Публичный установщик пока не доступен.</p></section>
+      <section class="closing wrap"><span class="leaf-mark" aria-hidden="true"></span><h2>Дайте мысли голос.</h2><p>Остальное — на вашем Mac.</p><a class="button button-primary" data-release href="%BASE_URL%downloads/Voicex-0.1.0-macos-arm64.dmg" download>Скачать для Mac ↗</a><p class="download-caption">0.1.0 · DMG, 3,15 МБ · <a href="%BASE_URL%downloads/SHA256SUMS.txt">SHA-256</a><br>Без заверения Apple · <a href="%BASE_URL%install.html#first-launch">Первый запуск ↗</a></p></section>
     </main>
     <footer class="site-footer wrap"><a class="brand" href="%BASE_URL%"><span class="leaf-mark" aria-hidden="true"></span>Voicex</a><nav aria-label="Навигация в подвале"><a href="#how">Как работает</a><a href="%BASE_URL%install.html">Установка</a><a href="%BASE_URL%privacy.html">Приватность</a></nav><span>Локальная диктовка для Mac · 2026</span></footer>
     <script type="module" src="./src/main.ts"></script>
