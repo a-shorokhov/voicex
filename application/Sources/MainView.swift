@@ -85,10 +85,12 @@ struct MainView: View {
                 Group {
                     switch model.section {
                     case .dictation: dictation
-                    case .settings: settings
+                    case .settings:
+                        ViewThatFits(in: .vertical) { settings.fixedSize(horizontal: false, vertical: true); ScrollView { settings } }
                     case .models: models
                     case .history: history
-                    case .onboarding: onboarding
+                    case .onboarding:
+                        ViewThatFits(in: .vertical) { onboarding.fixedSize(horizontal: false, vertical: true); ScrollView { onboarding } }
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -239,11 +241,11 @@ struct MainView: View {
     }
     private var subtitle: String {
         switch model.section {
-        case .dictation: "Проверьте микрофон здесь или диктуйте в любое поле горячей клавишей."
-        case .settings: "Настройте диктовку под себя."
-        case .models: "Локальная модель распознавания."
-        case .history: "Вы решаете, сохранять ли расшифровки."
-        case .onboarding: "Три шага до первой диктовки."
+        case .dictation: "Проверьте голос здесь. Для вставки в другое приложение используйте горячую клавишу."
+        case .settings: "Выберите язык, горячую клавишу и способ начала записи."
+        case .models: "Установите модель один раз — дальше распознавание работает без интернета."
+        case .history: "Временные результаты, которые исчезают после выхода из Voicex."
+        case .onboarding: "Подготовьте приложение и продиктуйте первую фразу в своё текстовое поле."
         }
     }
     private var dictation: some View {
@@ -266,12 +268,12 @@ struct MainView: View {
                     Button("Перейти к установке") { model.section = .models }.buttonStyle(SoftButton(primary: true))
                 }
                 if model.backgroundHotkeyNeedsPermission { backgroundHotkeyHelp }
-                Text("Говорите естественно. Остановите запись, чтобы получить текст.")
+                Text("«Начать проверку» записывает голос и показывает текст здесь, без вставки в другие приложения.")
                     .font(.system(size: 12)).foregroundStyle(.secondary)
             }.frame(maxWidth: .infinity).padding(.vertical, 8)
             Divider()
             VStack(alignment: .leading, spacing: 14) {
-                Text("Результат проверки").font(.system(size: 15)).foregroundStyle(.secondary)
+                Text("Последний результат").font(.system(size: 15)).foregroundStyle(.secondary)
                 HStack(alignment: .top, spacing: 18) {
                     Text(model.result.isEmpty ? "Здесь появится ваша расшифровка" : model.result)
                         .font(.system(size: 16)).foregroundStyle(model.result.isEmpty ? forest.opacity(0.4) : forest)
@@ -279,7 +281,7 @@ struct MainView: View {
                     Button { model.copy() } label: { Label(model.copied ? "Скопировано" : "Копировать", systemImage: model.copied ? "checkmark" : "doc.on.doc") }
                         .buttonStyle(SoftButton()).disabled(model.result.isEmpty)
                 }.padding(20).background(.white.opacity(0.35), in: RoundedRectangle(cornerRadius: 20))
-                Text("Во время проверки текст остаётся в этом окне.").font(.system(size: 12)).foregroundStyle(.secondary)
+                Text(externalDictationHelp).font(.system(size: 12)).foregroundStyle(.secondary)
             }
         }
     }
@@ -300,21 +302,24 @@ struct MainView: View {
                 Picker("Язык", selection: $language) { ForEach(["Auto", "RU", "EN"], id: \.self) { Text($0) } }
                     .labelsHidden().pickerStyle(.segmented).frame(width: 270)
             }
+            Text("Auto — определить язык по речи; RU — русский; EN — английский. Текст распознаётся без перевода.")
+                .font(.system(size: 12)).foregroundStyle(.secondary)
             Divider()
             row("Горячая клавиша") { shortcutControl }
-            if model.backgroundHotkeyNeedsPermission { backgroundHotkeyHelp }
+            Text(shortcut == "Не указано" ? "Запуск с клавиатуры выключен. Выберите клавишу, чтобы диктовать в другие приложения." : "⌃ Control · ⌥ Option · ⇧ Shift · ⌘ Command. «Правый» — клавиша справа от пробела.")
+                .font(.system(size: 12)).foregroundStyle(.secondary)
             Divider()
             row("Режим записи") {
                 Picker("Режим", selection: $mode) { ForEach(["Нажатие", "Удержание"], id: \.self) { Text($0) } }
                     .labelsHidden().pickerStyle(.segmented).frame(width: 270)
             }
-            Text(mode == "Нажатие" ? "Первое нажатие — запись, второе — остановка." : "Удерживайте клавиши во время записи.")
+            Text(mode == "Нажатие" ? "Первое нажатие — запись, второе — остановка." : "Удерживайте выбранную клавишу, пока говорите; отпустите для распознавания.")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
             Divider()
             Text("Разрешения").font(.system(size: 15)).foregroundStyle(.secondary)
             permission("Микрофон", icon: "mic", checked: model.microphoneGranted) { model.requestMicrophone() }
-            permission("Вставка текста", icon: "accessibility", checked: model.accessibilityGranted) { model.requestAccessibility() }
-            Text("Без Универсального доступа можно диктовать и копировать вручную. Для правых модификаторов и Fn в фоне нужен этот доступ.")
+            permission("Универсальный доступ", icon: "accessibility", checked: model.accessibilityGranted) { model.requestAccessibility() }
+            Text("Нажмите «Разрешить» и включите Voicex в открытом системном списке. Этот доступ нужен для вставки и работы правых модификаторов/Fn в фоне.")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
             Button("Открыть системные настройки") {
                 NSWorkspace.shared.open(URL(fileURLWithPath: "/System/Applications/System Settings.app"))
@@ -334,32 +339,35 @@ struct MainView: View {
                 }
                 Divider()
                 row("Размер модели") { Text("≈ 626 МБ").foregroundStyle(forest) }
-                Text("Дополнительные файлы также занимают место.").font(.system(size: 12)).foregroundStyle(.secondary)
+                Text("Помимо модели нужны файлы токенизатора и место для подготовки.").font(.system(size: 12)).foregroundStyle(.secondary)
                 row("Состояние") { Text(model.modelStatus).foregroundStyle(sage) }
                 if model.installing {
-                    ProgressView(value: model.progress)
+                    if model.modelStatus.contains("Подготовка") { ProgressView().controlSize(.small) }
+                    else { ProgressView(value: model.progress) }
+                    Text(model.modelStatus.contains("Подготовка") ? "Готовим модель к работе на этом Mac. Первый запуск может занять несколько минут." : "Скачиваем файлы. Дождитесь состояния «Готова»; установку можно отменить и повторить.")
+                        .font(.system(size: 12)).foregroundStyle(.secondary)
                     Button("Отменить установку") { model.cancelInstall() }.buttonStyle(SoftButton())
                 } else if model.modelReady {
                     Button("Удалить модель") { showRemoval = true }.buttonStyle(SoftButton()).disabled(model.busy)
                 } else {
                     HStack {
-                        Button("Установить Whisper") { model.install() }.buttonStyle(SoftButton(primary: true)).disabled(model.busy)
+                        Button(model.modelStatus == "Не установлена" ? "Установить модель" : "Повторить установку") { model.install() }.buttonStyle(SoftButton(primary: true)).disabled(model.busy)
                         if model.modelStatus != "Не установлена" {
-                            Button("Сбросить файлы") { showRemoval = true }.buttonStyle(SoftButton()).disabled(model.busy)
+                            Button("Удалить файлы модели") { showRemoval = true }.buttonStyle(SoftButton()).disabled(model.busy)
                         }
                     }
                 }
             }.padding(26).background(.white.opacity(0.3), in: RoundedRectangle(cornerRadius: 24))
             Label("После установки диктовка работает без интернета.", systemImage: "info.circle")
                 .font(.system(size: 13)).foregroundStyle(.secondary)
-            Text("Модель и токенизатор хранятся в Application Support/Voicex. При первой установке нужен интернет.")
+            Text("При установке нужен интернет. Голос и расшифровки обрабатываются на этом Mac. Удаление модели освобождает место; для следующей диктовки её потребуется установить снова.")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
         }
     }
     private var history: some View {
         VStack(alignment: .leading, spacing: 16) {
             Toggle("Сохранять результаты в этой сессии", isOn: $model.historyEnabled).toggleStyle(.switch)
-            Text("По умолчанию выключено. История живёт только в памяти и исчезнет после выхода.")
+            Text("До 100 последних результатов, только в памяти. Выключение прекращает добавление новых записей; уже показанные можно очистить. После выхода всё исчезнет.")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
             Divider()
             if model.history.isEmpty {
@@ -367,7 +375,7 @@ struct MainView: View {
                     Image(systemName: "clock").font(.system(size: 40)).foregroundStyle(sage)
                         .frame(width: 92, height: 92).background(sage.opacity(0.12), in: Circle())
                     Text(model.historyEnabled ? "Пока нет результатов" : "История выключена").font(.system(size: 21, weight: .medium))
-                    Text(model.historyEnabled ? "Продиктуйте фразу, чтобы увидеть результат." : "Сейчас доступен только последний результат.")
+                    Text(model.historyEnabled ? "Продиктуйте фразу, чтобы увидеть результат." : "Последний текст доступен в разделе «Диктовка». Новые записи не добавляются в историю.")
                         .foregroundStyle(.secondary)
                     Button(model.historyEnabled ? "Проверить диктовку" : "Включить историю") {
                         if model.historyEnabled { model.section = .dictation } else { model.historyEnabled = true }
@@ -395,28 +403,51 @@ struct MainView: View {
             }
         }
     }
+    private var externalDictationHelp: String {
+        if shortcut == "Не указано" { return "Для диктовки в другом приложении выберите горячую клавишу в «Основных настройках»." }
+        let action = mode == "Удержание" ? "удерживайте \(shortcut), говорите и отпустите клавишу" : "нажмите \(shortcut), говорите и нажмите ещё раз"
+        return "В другом приложении поставьте курсор в текстовое поле, \(action). Текст вставится в исходное поле. Если вставка недоступна, скопируйте результат здесь."
+    }
     private var onboarding: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            step(1, "Разрешите микрофон", "Для записи вашего голоса", done: model.microphoneGranted) {
+        VStack(alignment: .leading, spacing: 10) {
+            step(1, "Доступ к микрофону", model.microphoneGranted ? "Voicex может записывать ваш голос." : "Нажмите «Разрешить» и подтвердите запрос macOS. Если доступ отклонён, включите Voicex в открытом разделе «Микрофон».", done: model.microphoneGranted) {
                 model.requestMicrophone()
             }
-            step(2, "Разрешите вставку текста", "Через Универсальный доступ macOS", done: model.accessibilityGranted) {
+            step(2, "Вставка в другие приложения", model.accessibilityGranted ? "Универсальный доступ включён: работают вставка и фоновые клавиши." : "Нажмите «Разрешить», включите Voicex в системном списке и вернитесь сюда. Состояние обновится автоматически.", done: model.accessibilityGranted) {
                 model.requestAccessibility()
             }
-            HStack(spacing: 18) {
+            HStack(spacing: 12) {
                 number(3)
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Установите модель").font(.system(size: 17, weight: .medium))
-                    Text("Распознавание будет работать локально.").font(.system(size: 13)).foregroundStyle(.secondary)
-                    if model.installing { ProgressView(value: model.progress) }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Локальная модель").font(.system(size: 15, weight: .medium))
+                    Text(model.modelReady ? "Модель готова. Для диктовки интернет больше не нужен." : model.installing ? "\(model.modelStatus). Дождитесь «Готова»; первая подготовка может занять несколько минут." : "Нужен интернет для загрузки ≈ 626 МБ и дополнительных файлов. После установки распознавание работает на Mac.")
+                        .font(.system(size: 12)).foregroundStyle(.secondary)
                 }
-                Spacer()
-                if model.modelReady { Label("Готово", systemImage: "checkmark.circle.fill").foregroundStyle(sage) }
-                else { Button(model.installing ? "Отменить" : "Установить") { if model.installing { model.cancelInstall() } else { model.install() } }.buttonStyle(SoftButton(primary: !model.installing)) }
-            }.padding(20).background(.white.opacity(0.3), in: RoundedRectangle(cornerRadius: 22))
-            Divider().padding(.vertical, 8)
-            Button("Проверим диктовку") { model.section = .dictation }.buttonStyle(SoftButton(primary: true)).disabled(!model.modelReady)
-            Text("Без доступа к вставке можно копировать текст вручную.").font(.system(size: 12)).foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                if model.modelReady { Label("Готово", systemImage: "checkmark.circle.fill").font(.system(size: 12)).foregroundStyle(sage) }
+                else { Button(model.installing ? "Открыть" : "Установить") { model.section = .models }.buttonStyle(SoftButton()).disabled(model.busy) }
+            }.padding(14).background(.white.opacity(0.3), in: RoundedRectangle(cornerRadius: 18))
+            HStack(spacing: 12) {
+                number(4)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Клавиша и режим записи").font(.system(size: 15, weight: .medium))
+                    Text(shortcut == "Не указано" ? "Горячая клавиша выключена. Выберите её в настройках." : "Сейчас: \(shortcut) · \(mode == "Нажатие" ? "нажатие для старта и остановки" : "удержание во время речи"). Язык: \(language == "Auto" ? "автоматически" : language == "RU" ? "русский" : "английский").")
+                        .font(.system(size: 12)).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 8)
+                Button("Настроить") { model.section = .settings }.buttonStyle(SoftButton()).disabled(model.busy)
+            }.padding(14).background(.white.opacity(0.3), in: RoundedRectangle(cornerRadius: 18))
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Первая диктовка").font(.system(size: 15, weight: .medium))
+                Text(externalDictationHelp).font(.system(size: 12)).foregroundStyle(.secondary)
+                Text("Внизу экрана появится маленькая панель с амплитудой. Escape или × отменяют запись. Во время распознавания оставьте курсор в исходном поле; Enter не отправляется.")
+                    .font(.system(size: 12)).foregroundStyle(.secondary)
+                HStack {
+                    Button("Проверить микрофон здесь") { model.section = .dictation }.buttonStyle(SoftButton(primary: true)).disabled(!model.modelReady || !model.microphoneGranted || model.busy)
+                    Text("Окно можно закрыть: Voicex остаётся в строке меню. Оттуда доступны настройки и выход.")
+                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+            }.padding(.top, 4)
         }
     }
     private var time: String { String(format: "%02d:%02d", model.seconds / 60, model.seconds % 60) }
@@ -427,23 +458,23 @@ struct MainView: View {
         HStack {
             Label(title, systemImage: icon).font(.system(size: 15))
             Spacer()
-            Button(checked ? "Разрешено ✓" : "Проверить состояние") { action() }.buttonStyle(SoftButton())
+            Button(checked ? "Разрешено ✓" : "Разрешить") { action() }.buttonStyle(SoftButton()).disabled(checked)
         }
     }
     private func number(_ value: Int) -> some View {
-        Text("\(value)").font(.system(size: 22)).foregroundStyle(forest)
-            .frame(width: 48, height: 48).background(sage.opacity(0.18), in: Circle())
+        Text("\(value)").font(.system(size: 17)).foregroundStyle(forest)
+            .frame(width: 32, height: 32).background(sage.opacity(0.18), in: Circle())
     }
     private func step(_ n: Int, _ title: String, _ subtitle: String, done: Bool, action: @escaping () -> Void) -> some View {
-        HStack(spacing: 18) {
+        HStack(spacing: 12) {
             number(n)
             VStack(alignment: .leading, spacing: 6) {
-                Text(title).font(.system(size: 17, weight: .medium))
-                Text(subtitle).font(.system(size: 13)).foregroundStyle(.secondary)
+                Text(title).font(.system(size: 15, weight: .medium))
+                Text(subtitle).font(.system(size: 12)).foregroundStyle(.secondary)
             }
             Spacer()
-            Button(done ? "Готово ✓" : "Проверить") { action() }.buttonStyle(SoftButton())
-        }.padding(20).background(.white.opacity(0.3), in: RoundedRectangle(cornerRadius: 22))
+            Button(done ? "Готово ✓" : "Разрешить") { action() }.buttonStyle(SoftButton()).disabled(done)
+        }.padding(14).background(.white.opacity(0.3), in: RoundedRectangle(cornerRadius: 18))
     }
 }
 

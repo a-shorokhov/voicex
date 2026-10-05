@@ -58,6 +58,7 @@ struct HistoryItem: Identifiable {
     var busy: Bool { recording || processing || starting }
     init() {
         refreshPermissions()
+        if !microphoneGranted || !accessibilityGranted { section = .onboarding }
         hotkey.onDown = { [weak self] in
             guard let self else { return }
             if self.recording { if !self.holdSession { self.stop() }; return }
@@ -86,8 +87,9 @@ struct HistoryItem: Identifiable {
         installing = true; modelStatus = "Подготовка…"
         installTask = Task {
             do { modelReady = try await speech.loadInstalled(); modelStatus = modelReady ? "Готова" : "Не установлена" }
-            catch { modelStatus = "Ошибка подготовки"; status = "Не удалось загрузить модель. Удалите её и повторите установку." }
+            catch { modelStatus = "Ошибка подготовки"; status = "Не удалось подготовить модель. В «Моделях диктовки» удалите её файлы и повторите установку." }
             installing = false
+            if !modelReady && section == .dictation { section = .onboarding }
         }
     }
     func configureShortcut(suspended: Bool? = nil, force: Bool = false) {
@@ -121,7 +123,7 @@ struct HistoryItem: Identifiable {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_" + pane) { NSWorkspace.shared.open(url) }
     }
     func start(automatic: Bool = false) {
-        guard modelReady, !busy, !installing else { status = modelReady ? "Дождитесь завершения операции" : "Сначала установите модель"; return }
+        guard modelReady, !busy, !installing else { status = modelReady ? "Дождитесь завершения операции" : "Откройте «Модели диктовки» и установите модель."; return }
         let id = gate.begin()
         target = automatic ? PasteService.capture() : nil
         targetName = automatic ? NSWorkspace.shared.frontmostApplication?.localizedName ?? "Диктовка" : "Проверка диктовки"
@@ -132,7 +134,7 @@ struct HistoryItem: Identifiable {
             if AVCaptureDevice.authorizationStatus(for: .audio) == .notDetermined { _ = await AVCaptureDevice.requestAccess(for: .audio) }
             refreshPermissions()
             guard gate.accepts(id) else { starting = false; return }
-            guard microphoneGranted else { starting = false; status = "Разрешите микрофон в настройках macOS"; finish(); return }
+            guard microphoneGranted else { starting = false; status = "Откройте «Начало работы» и разрешите микрофон для Voicex."; finish(); return }
             do {
                 try audio.start(); starting = false; recording = true; seconds = 0; levels = Array(repeating: 0, count: 28)
                 status = "Запись…"; hotkey.cancelEnabled(true)
@@ -142,12 +144,12 @@ struct HistoryItem: Identifiable {
                         try? await Task.sleep(for: .milliseconds(60))
                         guard !Task.isCancelled, recording else { return }
                         let value = audio.snapshot(); seconds = Int(value.seconds)
-                        levels.removeFirst(); levels.append(CGFloat(min(1, sqrt(value.level) * 2.8)))
-                        if value.failed { cancel(); status = "Ошибка микрофона. Начните запись снова."; return }
+                        levels = MicrophoneWaveform.shifted(levels, newLevels: value.levels)
+                        if value.failed { cancel(); status = "Не удалось записать звук. Проверьте подключение микрофона и начните снова."; return }
                         if value.seconds >= 300 { stop(); return }
                     }
                 }
-            } catch { starting = false; status = "Не удалось начать запись: " + error.localizedDescription; finish() }
+            } catch { starting = false; status = "Не удалось начать запись. Проверьте микрофон и его разрешение в «Основных настройках», затем попробуйте снова."; finish() }
         }
     }
     func stop() {
@@ -155,7 +157,7 @@ struct HistoryItem: Identifiable {
         timer?.cancel(); recording = false
         let samples = audio.stop()
         guard RecordingPolicy.hasSpeech(samples) else {
-            status = "Речь не обнаружена или запись слишком короткая"; finish(); return
+            status = "Речь не обнаружена. Начните новую запись и произнесите фразу чуть дольше."; finish(); return
         }
         processing = true; status = "Распознаём…"
         let selected = UserDefaults.standard.string(forKey: "recognitionLanguage") ?? "Auto"
@@ -169,10 +171,10 @@ struct HistoryItem: Identifiable {
                 result = text; copied = false
                 if historyEnabled { history.insert(HistoryItem(text: text), at: 0); if history.count > 100 { history.removeLast() } }
                 if automaticPaste {
-                    status = PasteService.paste(text, into: target) ? "Команда вставки отправлена" : "Текст готов. Автовставка недоступна — скопируйте результат."
+                    status = PasteService.paste(text, into: target) ? "Команда вставки отправлена" : "Текст готов. Откройте «Диктовка» и нажмите «Копировать»: исходное поле недоступно или изменилось."
                 } else { status = "Проверка завершена. Текст остаётся в этом окне." }
             } catch {
-                if gate.accepts(id), !(error is CancellationError) { status = "Ошибка распознавания: " + error.localizedDescription }
+                if gate.accepts(id), !(error is CancellationError) { status = "Не удалось распознать. Повторите запись; если ошибка повторяется, переустановите модель в «Моделях диктовки»." }
             }
         }
     }
@@ -195,7 +197,7 @@ struct HistoryItem: Identifiable {
                 } }
                 try Task.checkCancellation()
                 modelReady = true; modelStatus = "Готова"; status = "Модель готова к локальной диктовке"
-            } catch { modelReady = false; modelStatus = error is CancellationError ? "Установка отменена" : "Ошибка установки"; if !(error is CancellationError) { status = error.localizedDescription } }
+            } catch { modelReady = false; modelStatus = error is CancellationError ? "Установка отменена" : "Ошибка установки"; if !(error is CancellationError) { status = "Не удалось установить модель. Проверьте интернет и свободное место, затем нажмите «Повторить установку»." } }
         }
     }
     func cancelInstall() { installTask?.cancel(); modelStatus = "Отмена…" }
@@ -205,7 +207,7 @@ struct HistoryItem: Identifiable {
         installTask = Task {
             defer { installing = false }
             do { try await speech.remove(); modelStatus = "Не установлена" }
-            catch { modelStatus = "Ошибка удаления"; status = error.localizedDescription }
+            catch { modelStatus = "Ошибка удаления"; status = "Не удалось удалить файлы модели. Перезапустите Voicex и повторите удаление в «Моделях диктовки»." }
         }
     }
     func copy(_ text: String? = nil) {

@@ -19,4 +19,7 @@ ditto "$source_app" "$stage/Voicex.app"
 codesign --verify --deep --strict "$stage/Voicex.app"
 if [[ -e "$target_app" ]]; then mv "$target_app" "$stage/previous.app"; fi
 mv "$stage/Voicex.app" "$target_app"
+# Refresh only this bundle's registration, including its Finder/Dock icon.
+registrar=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+if [[ -x "$registrar" ]]; then "$registrar" -f "$target_app"; fi
 print 'Установлено /Applications/Voicex.app. Запустите приложение оттуда; системные разрешения выдаются вручную.'

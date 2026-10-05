@@ -21,6 +21,7 @@ binary_dir=$(swift build --scratch-path build/spm -c "$configuration" --arch arm
 mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$binary_dir/Voicex" "$app/Contents/MacOS/Voicex"
 cp Info.plist "$app/Contents/Info.plist"
+cp Resources/AppIcon.icns "$app/Contents/Resources/AppIcon.icns"
 for bundle in "$binary_dir"/*.bundle(N); do
     rm -rf "$app/${bundle:t}" "$app/Contents/Resources/${bundle:t}"
     cp -R "$bundle" "$app/Contents/Resources/"

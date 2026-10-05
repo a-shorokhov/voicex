@@ -8,6 +8,8 @@
 	<string>Voicex</string>
 	<key>CFBundleIdentifier</key>
 	<string>io.github.a-shorokhov.voicex</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
 	<key>CFBundleName</key>
 	<string>Voicex</string>
 	<key>CFBundlePackageType</key>

@@ -6,7 +6,7 @@
  objects = {
   A00000000000000000000001 = {isa = PBXProject; attributes = {LastUpgradeCheck = 1600;}; buildConfigurationList = A00000000000000000000002; compatibilityVersion = "Xcode 14.0"; developmentRegion = ru; hasScannedForEncodings = 0; knownRegions = (ru, en, Base); mainGroup = A00000000000000000000003; productRefGroup = A00000000000000000000004; projectDirPath = ""; projectRoot = ""; packageReferences = (B00000000000000000000078, B00000000000000000000079); targets = (A00000000000000000000005, B000000000000000000000A1);};
   A00000000000000000000002 = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000006, A00000000000000000000007); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
-  A00000000000000000000003 = {isa = PBXGroup; children = (A00000000000000000000008, A00000000000000000000009, B00000000000000000000097, A00000000000000000000004); sourceTree = "<group>";};
+  A00000000000000000000003 = {isa = PBXGroup; children = (A00000000000000000000008, A00000000000000000000009, B000000000000000000000A4, B00000000000000000000097, A00000000000000000000004); sourceTree = "<group>";};
   A00000000000000000000004 = {isa = PBXGroup; children = (A0000000000000000000000A, B00000000000000000000098); name = Products; sourceTree = "<group>";};
   A00000000000000000000005 = {isa = PBXNativeTarget; buildConfigurationList = A0000000000000000000000B; buildPhases = (A0000000000000000000000C, A0000000000000000000000D, A0000000000000000000000E); buildRules = (); dependencies = (); packageProductDependencies = (B00000000000000000000082, B00000000000000000000083); name = Voicex; productName = Voicex; productReference = A0000000000000000000000A; productType = "com.apple.product-type.application";};
   A00000000000000000000006 = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 14.0; SDKROOT = macosx; SWIFT_VERSION = 5.0;}; name = Debug;};
@@ -17,7 +17,7 @@
   A0000000000000000000000B = {isa = XCConfigurationList; buildConfigurations = (A00000000000000000000012, A00000000000000000000013); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
   A0000000000000000000000C = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A00000000000000000000014, A00000000000000000000015, A00000000000000000000016, B0000000000000000000006E, B0000000000000000000006F, B00000000000000000000070, B00000000000000000000071, B00000000000000000000072, B000000000000000000000A3); runOnlyForDeploymentPostprocessing = 0;};
   A0000000000000000000000D = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (B0000000000000000000008C, B0000000000000000000008D); runOnlyForDeploymentPostprocessing = 0;};
-  A0000000000000000000000E = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0;};
+  A0000000000000000000000E = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (B000000000000000000000A5); runOnlyForDeploymentPostprocessing = 0;};
   A0000000000000000000000F = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>";};
   A00000000000000000000010 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoicexApp.swift; sourceTree = "<group>";};
   A00000000000000000000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>";};
@@ -57,6 +57,8 @@
   B000000000000000000000A1 = {isa = PBXNativeTarget; buildConfigurationList = B000000000000000000000A0; buildPhases = (B0000000000000000000009A, B0000000000000000000009B); buildRules = (); dependencies = (B0000000000000000000009D); name = VoicexTests; productName = VoicexTests; productReference = B00000000000000000000098; productType = "com.apple.product-type.bundle.unit-test";};
   B000000000000000000000A2 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionState.swift; sourceTree = "<group>";};
   B000000000000000000000A3 = {isa = PBXBuildFile; fileRef = B000000000000000000000A2;};
+  B000000000000000000000A4 = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Resources/AppIcon.icns; sourceTree = "<group>";};
+  B000000000000000000000A5 = {isa = PBXBuildFile; fileRef = B000000000000000000000A4;};
  };
  rootObject = A00000000000000000000001;
 }

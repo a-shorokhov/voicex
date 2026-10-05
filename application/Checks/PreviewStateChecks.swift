@@ -15,6 +15,16 @@ import Foundation
         precondition(HotkeyConfiguration(label: "⌃ ⇧ Space", trusted: false, suspended: false).backgroundAvailable)
         precondition(!HotkeyConfiguration(label: "Правый ⌘", trusted: true, suspended: true).backgroundAvailable)
         precondition(!HotkeyConfiguration(label: "Не указано", trusted: true, suspended: false).backgroundAvailable)
+        let silentBars = Array(repeating: Float(0), count: 280).withUnsafeBufferPointer { MicrophoneWaveform.levels($0) }
+        precondition(silentBars.count == 28 && silentBars.allSatisfy { $0 == 0 })
+        let variedAudio = Array(repeating: Float(0.1), count: 140) + Array(repeating: Float(0), count: 140)
+        let variedBars = variedAudio.withUnsafeBufferPointer { MicrophoneWaveform.levels($0) }
+        precondition(variedBars.prefix(14).allSatisfy { $0 > 0.7 && $0 <= 1 })
+        precondition(variedBars.suffix(14).allSatisfy { $0 == 0 })
+        let shifted = MicrophoneWaveform.shifted([0.1, 0.2, 0.3], newLevels: [0.8, 0.8])
+        precondition(shifted.count == 3 && shifted[0] == 0.2 && shifted[1] == 0.3 && abs(shifted[2] - 0.8) < 0.001)
+        let paused = MicrophoneWaveform.shifted(shifted, newLevels: [0])
+        precondition(paused[0] == 0.3 && paused[1] == shifted[2] && paused[2] == 0)
         var edge = HotkeyEdge()
         precondition(edge.down() && !edge.down() && edge.up() && !edge.up() && edge.down())
         precondition(!RecordingPolicy.hasSpeech([]))
