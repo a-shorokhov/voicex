@@ -110,7 +110,7 @@ struct MainView: View {
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.16), value: model.section)
         .tint(forest)
-        .onAppear { if !model.busy { model.configureShortcut() } }
+        .onAppear { if !model.busy { model.configureShortcut(force: true) } }
         .alert("Voicex", isPresented: Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })) {
             Button("Понятно", role: .cancel) { model.message = nil }
         } message: { Text(model.message ?? "") }
@@ -265,6 +265,7 @@ struct MainView: View {
                 } else {
                     Button("Перейти к установке") { model.section = .models }.buttonStyle(SoftButton(primary: true))
                 }
+                if model.backgroundHotkeyNeedsPermission { backgroundHotkeyHelp }
                 Text("Говорите естественно. Остановите запись, чтобы получить текст.")
                     .font(.system(size: 12)).foregroundStyle(.secondary)
             }.frame(maxWidth: .infinity).padding(.vertical, 8)
@@ -282,14 +283,26 @@ struct MainView: View {
             }
         }
     }
+    private var backgroundHotkeyHelp: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Для этой клавиши в фоне нужен Универсальный доступ", systemImage: "lock")
+                .font(.system(size: 12)).foregroundStyle(forest)
+            HStack {
+                Button("Разрешить доступ") { model.requestAccessibility() }.buttonStyle(SoftButton())
+                Button("Использовать ⌃⇧Space") { model.useStandardShortcut() }.buttonStyle(SoftButton())
+            }
+        }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
+            .background(sage.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
+    }
     private var settings: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             row("Язык распознавания") {
                 Picker("Язык", selection: $language) { ForEach(["Auto", "RU", "EN"], id: \.self) { Text($0) } }
                     .labelsHidden().pickerStyle(.segmented).frame(width: 270)
             }
             Divider()
             row("Горячая клавиша") { shortcutControl }
+            if model.backgroundHotkeyNeedsPermission { backgroundHotkeyHelp }
             Divider()
             row("Режим записи") {
                 Picker("Режим", selection: $mode) { ForEach(["Нажатие", "Удержание"], id: \.self) { Text($0) } }

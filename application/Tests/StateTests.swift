@@ -26,6 +26,18 @@ final class StateTests: XCTestCase {
         XCTAssertTrue(RecordingPolicy.hasSpeech(Array(repeating: 0.05, count: 16000)))
         XCTAssertEqual(RecordingPolicy.maximumSamples, 4_800_000)
     }
+    func testBackgroundModifierReconnectsWhenAccessChanges() {
+        let blocked = HotkeyConfiguration(label: "Правый ⌘", trusted: false, suspended: false)
+        let granted = HotkeyConfiguration(label: "Правый ⌘", trusted: true, suspended: false)
+        XCTAssertTrue(blocked.needsAccessibility)
+        XCTAssertFalse(blocked.backgroundAvailable)
+        XCTAssertTrue(granted.backgroundAvailable)
+        XCTAssertNotEqual(blocked, granted)
+        XCTAssertEqual(granted, HotkeyConfiguration(label: "Правый ⌘", trusted: true, suspended: false))
+        XCTAssertTrue(HotkeyConfiguration(label: "⌃ ⇧ Space", trusted: false, suspended: false).backgroundAvailable)
+        XCTAssertFalse(HotkeyConfiguration(label: "Правый ⌘", trusted: true, suspended: true).backgroundAvailable)
+        XCTAssertFalse(HotkeyConfiguration(label: "Не указано", trusted: true, suspended: false).backgroundAvailable)
+    }
     func testRepeatSuppressionAndRelease() {
         var edge = HotkeyEdge()
         XCTAssertTrue(edge.down())

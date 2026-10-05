@@ -12,6 +12,7 @@ extension KeyboardShortcuts.Name {
     private var monitors: [Any] = []
     private var edge = HotkeyEdge()
     private var suspended = false
+    private var configuration: HotkeyConfiguration?
     init() {
         KeyboardShortcuts.onKeyDown(for: .dictation) { [weak self] in self?.down() }
         KeyboardShortcuts.onKeyUp(for: .dictation) { [weak self] in self?.up() }
@@ -21,12 +22,16 @@ extension KeyboardShortcuts.Name {
     private func down() { guard !suspended, edge.down() else { return }; onDown() }
     private func up() { guard edge.up() else { return }; if !suspended { onUp() } }
     func cancelEnabled(_ enabled: Bool) { if enabled { KeyboardShortcuts.enable(.cancelDictation) } else { KeyboardShortcuts.disable(.cancelDictation) } }
-    func configure(suspended: Bool? = nil) {
-        if let suspended { self.suspended = suspended }; edge = HotkeyEdge()
+    func configure(suspended: Bool? = nil, force: Bool = false) {
+        if let suspended { self.suspended = suspended }
+        let label = UserDefaults.standard.string(forKey: "shortcutPreview") ?? "⌃ ⇧ Space"
+        let next = HotkeyConfiguration(label: label, trusted: AXIsProcessTrusted(), suspended: self.suspended)
+        guard force || configuration != next else { return }
+        configuration = next
+        edge = HotkeyEdge()
         monitors.forEach(NSEvent.removeMonitor); monitors = []
         KeyboardShortcuts.disable(.dictation)
         guard !self.suspended else { return }
-        let label = UserDefaults.standard.string(forKey: "shortcutPreview") ?? "⌃ ⇧ Space"
         if label == "Не указано" { return }
         if label == "⌃ ⇧ Space" {
             KeyboardShortcuts.setShortcut(.init(.space, modifiers: [.control, .shift]), for: .dictation)

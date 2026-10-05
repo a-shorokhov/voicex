@@ -18,3 +18,12 @@ struct RecordingPolicy {
         return samples.reduce(0.0, { $0 + Double($1 * $1) }) / Double(samples.count) > 0.000001
     }
 }
+
+struct HotkeyConfiguration: Equatable {
+    let label: String
+    let trusted: Bool
+    let suspended: Bool
+    static let modifierOnly: Set<String> = ["Правый ⌘", "Правый ⌥", "Правый ⇧", "Правый ⌃", "⌥ + ⌘", "⌃ + ⌘", "⌃ + ⌥", "⇧ + ⌘", "⌥ + ⇧", "⌃ + ⇧", "Fn"]
+    var needsAccessibility: Bool { Self.modifierOnly.contains(label) && !trusted }
+    var backgroundAvailable: Bool { !suspended && label != "Не указано" && !needsAccessibility }
+}

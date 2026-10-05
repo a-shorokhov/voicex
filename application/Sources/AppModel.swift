@@ -37,6 +37,7 @@ struct HistoryItem: Identifiable {
     @Published var history: [HistoryItem] = []
     @Published var microphoneGranted = false
     @Published var accessibilityGranted = false
+    @Published var backgroundHotkeyNeedsPermission = false
     @Published var message: String?
     @Published var status = "Распознавание локально на Mac"
     @Published var levels: [CGFloat] = Array(repeating: 0, count: 28)
@@ -53,6 +54,7 @@ struct HistoryItem: Identifiable {
     private var work: Task<Void, Never>?
     private var installTask: Task<Void, Never>?
     private var observers: [NSObjectProtocol] = []
+    private var permissionTask: Task<Void, Never>?
     var busy: Bool { recording || processing || starting }
     init() {
         refreshPermissions()
@@ -67,6 +69,15 @@ struct HistoryItem: Identifiable {
         }
         hotkey.onCancel = { [weak self] in self?.cancel() }
         hotkey.configure()
+        // System Settings can grant access while Voicex remains in the background.
+        // Reconnect only on a configuration change; never reset a held session.
+        permissionTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard !Task.isCancelled else { return }
+                self?.refreshPermissions()
+            }
+        }
         observers.append(NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.refreshPermissions(); if self?.busy == false { self?.hotkey.configure() } } })
         observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in self?.cancel() } })
         observers.append(NotificationCenter.default.addObserver(forName: .AVAudioEngineConfigurationChange, object: nil, queue: .main) { [weak self] _ in Task { @MainActor in
@@ -79,10 +90,20 @@ struct HistoryItem: Identifiable {
             installing = false
         }
     }
-    func configureShortcut(suspended: Bool = false) { hotkey.configure(suspended: suspended) }
+    func configureShortcut(suspended: Bool? = nil, force: Bool = false) {
+        refreshPermissions()
+        hotkey.configure(suspended: suspended, force: force)
+    }
+    func useStandardShortcut() {
+        UserDefaults.standard.set("⌃ ⇧ Space", forKey: "shortcutPreview")
+        configureShortcut(suspended: false)
+    }
     func refreshPermissions() {
         microphoneGranted = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
         accessibilityGranted = AXIsProcessTrusted()
+        let label = UserDefaults.standard.string(forKey: "shortcutPreview") ?? "⌃ ⇧ Space"
+        backgroundHotkeyNeedsPermission = HotkeyConfiguration(label: label, trusted: accessibilityGranted, suspended: false).needsAccessibility
+        if !busy { hotkey.configure() }
     }
     func requestMicrophone() {
         Task {
@@ -155,7 +176,7 @@ struct HistoryItem: Identifiable {
             }
         }
     }
-    private func finish() { gate.cancel(); target = nil; hotkey.cancelEnabled(false); hud?.hide() }
+    private func finish() { gate.cancel(); target = nil; hotkey.cancelEnabled(false); hud?.hide(); refreshPermissions() }
     func cancel() {
         gate.cancel(); timer?.cancel(); work?.cancel()
         if recording { _ = audio.stop() }; recording = false; seconds = 0

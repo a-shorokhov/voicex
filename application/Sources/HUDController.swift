@@ -10,8 +10,10 @@ private final class DictationPanel: NSPanel {
     init(model: AppModel) {
         panel = DictationPanel(contentRect: NSRect(x: 0, y: 0, width: 340, height: 86), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.title = "Voicex — диктовка"
-        panel.isFloatingPanel = true; panel.level = .floating
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        panel.isFloatingPanel = true; panel.level = .statusBar
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+        panel.becomesKeyOnlyIfNeeded = true
+        panel.isMovableByWindowBackground = false
         panel.hidesOnDeactivate = false; panel.isOpaque = false; panel.backgroundColor = .clear
         panel.hasShadow = true; panel.contentView = NSHostingView(rootView: DictationHUD(model: model))
         panel.isReleasedWhenClosed = false
