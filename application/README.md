@@ -63,3 +63,9 @@ sandbox-exec -p '(version 1)(allow default)(deny network*)' build/model-checks /
 Проверка не выводит распознанный текст. Не передавайте ей личные аудиозаписи. Результаты и незавершённая ручная приёмка — в `UI-VERIFICATION.md`.
 
 Артефакты: `build/Voicex.app`, `build/release/Voicex-macos-arm64.dmg`, `build/release/SHA256SUMS.txt`. Лицензии зависимостей — `NOTICES.md`, также включены в приложение и DMG. Публичной публикации нет.
+
+## Передача установщика на лендинг
+
+`Scripts/package-dmg.sh` создаёт версионный `build/release/Voicex-0.1.0-macos-arm64.dmg`, стабильную локальную копию, `SHA256SUMS.txt`, `release.json` и копию `RELEASE-HANDOFF.md`. Внутри DMG — Voicex.app, Applications shortcut, пользовательская `INSTALL.txt` и notices. Точный размер и SHA-256 генерируются из итогового файла.
+
+Агент сайта получает DMG и инструкции из `RELEASE-HANDOFF.md`; сборка сама ничего не публикует и не меняет landing. Скачать установщик и скачать модель — разные шаги. Для первого запуска через интернет остаётся ограничение ad hoc/без нотариального заверения Apple; инструкция установки объясняет штатный путь подтверждения. Проверка копирования из DMG не заменяет приёмку первого запуска на другом Mac с Gatekeeper.
